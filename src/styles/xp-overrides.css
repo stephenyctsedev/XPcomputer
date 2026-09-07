@@ -1,0 +1,17 @@
+/* Shell styling layered over XP.css. Sections are appended per task. */
+
+/* ---- Icons ---- */
+.xp-ico { display: inline-block; vertical-align: middle; line-height: 0; flex: none; }
+.xp-ico svg { width: 100%; height: 100%; display: block; }
+
+/* ---- Windows ---- */
+.xp-window { position: absolute; display: flex; flex-direction: column; box-sizing: border-box; }
+.xp-window .title-bar { cursor: default; user-select: none; -webkit-user-select: none; }
+.xp-window .title-bar-text { display: flex; align-items: center; gap: 5px; overflow: hidden; white-space: nowrap; }
+.xp-window .xp-window-body { flex: 1; min-height: 0; margin: 0; padding: 0; display: flex; flex-direction: column; overflow: hidden; background: #ece9d8; }
+.xp-window:not(.xp-active) .title-bar { filter: saturate(0.35) brightness(1.15); }
+.xp-window:not(.xp-active) .title-bar-text { color: #d8d2bd; }
+.xp-resize-handle { position: absolute; right: 0; bottom: 0; width: 18px; height: 18px; cursor: nwse-resize; }
+.xp-maximized, .xp-maximized .title-bar { border-radius: 0 !important; }
+.xp-inert { pointer-events: none; }
+.xp-inert .title-bar { filter: saturate(0.35) brightness(1.15); }
