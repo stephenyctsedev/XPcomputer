@@ -110,8 +110,8 @@
 .xp-start:hover, .xp-start.active { background: linear-gradient(#57b857, #3d9b3d 60%, #2f7d2f); }
 .xp-start-flag { display: grid; grid-template-columns: 8px 8px; gap: 1px; transform: skewY(-8deg); }
 .xp-start-flag i { display: block; width: 8px; height: 7px; border-radius: 1px; }
-.xp-start-flag i:nth-child(1) { background: #f35325; } .xp-start-flag i:nth-child(2) { background: #81bc06; }
-.xp-start-flag i:nth-child(3) { background: #05a6f0; } .xp-start-flag i:nth-child(4) { background: #ffba08; }
+.xp-start-flag i:nth-child(1) { background: #ff1493; } .xp-start-flag i:nth-child(2) { background: #00d9ff; }
+.xp-start-flag i:nth-child(3) { background: #b800ff; } .xp-start-flag i:nth-child(4) { background: #1eff00; }
 .xp-tasks { flex: 1; display: flex; align-items: center; gap: 3px; padding: 0 6px; overflow: hidden; }
 .xp-task { display: flex; align-items: center; gap: 6px; height: 22px; width: 160px; padding: 0 8px; border: 1px solid #1a3f9e; border-radius: 3px; background: linear-gradient(#4b8ef0, #3a7ae0); color: #fff; font: inherit; box-shadow: inset 1px 1px 0 rgba(255,255,255,.3); min-width: 0; min-height: 0; cursor: default; }
 .xp-task-label { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }

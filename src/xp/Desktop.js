@@ -30,7 +30,11 @@ export function createDesktopIcons(container, defs) {
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
     e.preventDefault();
     const i = buttons.indexOf(selected);
-    select(buttons[(i + (e.key === 'ArrowDown' ? 1 : buttons.length - 1)) % buttons.length]);
+    if (i === -1) {
+      select(buttons[e.key === 'ArrowDown' ? 0 : buttons.length - 1]);
+    } else {
+      select(buttons[(i + (e.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length]);
+    }
   });
   return { select, clear: () => select(null), buttons };
 }

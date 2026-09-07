@@ -40,7 +40,8 @@ export function createTaskbar(rootEl, { wm, sounds, onStart, now = () => new Dat
       b.querySelector('.xp-task-label').textContent = win.title;
     }
   };
-  wm.on('open', (win) => {
+  const unsubscribers = [];
+  unsubscribers.push(wm.on('open', (win) => {
     if (win.isDialog) return;
     const b = document.createElement('button');
     b.type = 'button';
@@ -58,9 +59,9 @@ export function createTaskbar(rootEl, { wm, sounds, onStart, now = () => new Dat
     tasks.append(b);
     buttons.set(win, b);
     renderTasks();
-  });
-  wm.on('close', (win) => { buttons.get(win)?.remove(); buttons.delete(win); renderTasks(); });
-  for (const ev of ['focus', 'minimize', 'restore', 'title']) wm.on(ev, renderTasks);
+  }));
+  unsubscribers.push(wm.on('close', (win) => { buttons.get(win)?.remove(); buttons.delete(win); renderTasks(); }));
+  for (const ev of ['focus', 'minimize', 'restore', 'title']) unsubscribers.push(wm.on(ev, renderTasks));
 
   let balloonTimer = null;
   function hideBalloon() { balloon.hidden = true; clearTimeout(balloonTimer); }
@@ -74,5 +75,5 @@ export function createTaskbar(rootEl, { wm, sounds, onStart, now = () => new Dat
     balloon.onclick = (e) => { hideBalloon(); if (!e.target.closest('.xp-balloon-close')) onClick?.(); };
   }
 
-  return { el: rootEl, tick, showBalloon, hideBalloon, setStartActive: (on) => start.classList.toggle('active', on), destroy: () => clearInterval(clockTimer) };
+  return { el: rootEl, tick, showBalloon, hideBalloon, setStartActive: (on) => start.classList.toggle('active', on), destroy: () => { clearInterval(clockTimer); clearTimeout(balloonTimer); unsubscribers.forEach(fn => fn()); } };
 }
