@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 768" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a63c9"/><stop offset="0.6" stop-color="#7fb6ef"/><stop offset="1" stop-color="#cfe6fb"/>
+    </linearGradient>
+    <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8fd14f"/><stop offset="1" stop-color="#3f8f1f"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="768" fill="url(#sky)"/>
+  <g fill="#fff" opacity="0.85">
+    <ellipse cx="220" cy="150" rx="90" ry="30"/><ellipse cx="270" cy="130" rx="60" ry="28"/>
+    <ellipse cx="760" cy="200" rx="110" ry="32"/><ellipse cx="820" cy="180" rx="70" ry="30"/>
+  </g>
+  <path d="M0 520 C 200 420, 380 470, 560 430 C 740 390, 900 460, 1024 400 L 1024 768 L 0 768 Z" fill="url(#hill)"/>
+  <path d="M0 620 C 250 560, 520 640, 1024 560 L 1024 768 L 0 768 Z" fill="#3a8a1e" opacity="0.9"/>
+</svg>
