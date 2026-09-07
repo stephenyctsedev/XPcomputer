@@ -15,3 +15,13 @@
 .xp-maximized, .xp-maximized .title-bar { border-radius: 0 !important; }
 .xp-inert { pointer-events: none; }
 .xp-inert .title-bar { filter: saturate(0.35) brightness(1.15); }
+
+/* ---- Dialogs ---- */
+.xp-msgbox { display: flex; flex-direction: column; gap: 12px; padding: 14px 12px 10px; flex: 1; font-size: 11px; }
+.xp-msgbox-row { display: flex; gap: 12px; align-items: flex-start; }
+.xp-msgbox-text { flex: 1; line-height: 1.45; white-space: pre-line; }
+.xp-msgbox-buttons { display: flex; justify-content: center; gap: 6px; margin-top: auto; }
+.xp-msgbox-buttons button { min-width: 75px; }
+.xp-rundlg .xp-msgbox-buttons { justify-content: flex-end; }
+.xp-run-field { display: flex; gap: 8px; align-items: center; }
+.xp-run-field input { flex: 1; }
