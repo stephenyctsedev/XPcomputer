@@ -27,6 +27,10 @@ publish `resume-<branch>.pdf` to the `preview` branch, then:
 
 This rewrites `src/data/resume.json` and `public/resume/resume-main.pdf`.
 
+**Note:** The downloadable PDF always includes the phone number — it is the
+actual resume document as used in employer submissions. The `--include-phone`
+flag only affects the generated site content (`resume.json` / homepage).
+
 ## Build and deploy
 
     npm run build        # dist/

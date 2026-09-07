@@ -28,6 +28,8 @@ mkdirSync(resolve(root, 'src/data'), { recursive: true });
 writeFileSync(resolve(root, 'src/data/resume.json'), JSON.stringify(resume, null, 2) + '\n', 'utf8');
 console.log(`ok  src/data/resume.json — ${resume.experience.length} jobs, phone ${resume.contact.phone ? 'INCLUDED' : 'excluded'}`);
 
+// Copy the PDF verbatim from the Resume repo's preview branch. The PDF intentionally includes the phone number
+// (it is Stephen's real resume as sent to employers); only the generated resume.json and homepage gate the phone behind --include-phone.
 try {
   execFileSync('git', ['-C', repo, 'fetch', 'origin', 'preview'], { stdio: 'inherit' });
   const pdf = execFileSync('git', ['-C', repo, 'show', `origin/preview:resume-${branch}.pdf`], { maxBuffer: 64 * 1024 * 1024 });
