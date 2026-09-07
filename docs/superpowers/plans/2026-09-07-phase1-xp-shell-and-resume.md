@@ -3783,6 +3783,7 @@ Append to `src/styles/xp-overrides.css`:
   cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='24' viewBox='0 0 20 24'><path d='M2 1v19l5-4 3 7 3-1-3-7h6z' fill='%23fff' stroke='%23000' stroke-width='1.2' stroke-linejoin='round'/></svg>") 2 2, default; }
 /* While the screen is not interactive (camera away from the monitor) nothing inside may receive pointer events,
    including descendants that set pointer-events: auto for themselves. */
+.xp-screen.xp-interactive { pointer-events: auto; }
 .xp-screen:not(.xp-interactive), .xp-screen:not(.xp-interactive) * { pointer-events: none !important; }
 .xp-screen a, .xp-screen .xp-taskpane a, .xp-screen .xp-sm-item, .xp-screen .xp-desktop-icon { cursor: inherit; }
 .xp-screen *, .xp-screen *::before, .xp-screen *::after { box-sizing: border-box; }
