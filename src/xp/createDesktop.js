@@ -41,7 +41,11 @@ export function createDesktop(rootEl, { resume, pdfHref, repoUrl, storage = safe
   const on = (event, fn) => { if (!listeners.has(event)) listeners.set(event, new Set()); listeners.get(event).add(fn); return () => listeners.get(event).delete(fn); };
   const emit = (event, data) => { for (const fn of listeners.get(event) ?? []) fn(data); };
 
-  const sounds = createSounds({ storage });
+  const rawSounds = createSounds({ storage });
+  // Instrument every sounds.play() call at this single seam so Phase 2 (the 3D room)
+  // can sync audio-visual cues off the same 'sound' event as booted/shutdown/logoff,
+  // without touching each call site individually.
+  const sounds = { ...rawSounds, play(name) { rawSounds.play(name); emit('sound', name); } };
   const wm = createWindowManager(rootEl.querySelector('.xp-windows'));
   const dialogs = createDialogs(wm, { sounds });
   const menus = createMenus(rootEl, { sounds });
@@ -163,6 +167,14 @@ export function createDesktop(rootEl, { resume, pdfHref, repoUrl, storage = safe
     el: rootEl, ctx, powerOn, powerOff, setInteractive, on,
     get isOn() { return boot.state === 'on'; },
     get powerState() { return boot.state; },
-    destroy() { rootListenerAbort.abort(); taskbar.destroy(); wm.closeAll(); rootEl.innerHTML = ''; },
+    destroy() {
+      rootListenerAbort.abort();
+      // Close before wiping the DOM: startMenu/menus each own document-level listeners
+      // (and attachMenubar's per-open teardown hook) that only get released via close().
+      setInteractive(false);
+      taskbar.destroy();
+      wm.closeAll();
+      rootEl.innerHTML = '';
+    },
   };
 }

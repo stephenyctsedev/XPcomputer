@@ -1,6 +1,7 @@
 /** One popup menu at a time, appended to the screen element so it can overflow windows. */
 export function createMenus(screenEl, { sounds } = {}) {
   let current = null;
+  let currentOnClose = null;
 
   function onDocumentDown(e) { if (current && !current.contains(e.target)) close(); }
   function close() {
@@ -8,6 +9,9 @@ export function createMenus(screenEl, { sounds } = {}) {
     current.remove();
     current = null;
     document.removeEventListener('pointerdown', onDocumentDown, true);
+    const onClose = currentOnClose;
+    currentOnClose = null;
+    onClose?.();
   }
   /** Viewport rect -> desktop-space coordinates (the screen may be CSS-scaled). */
   function toLocal(rect) {
@@ -38,9 +42,10 @@ export function createMenus(screenEl, { sounds } = {}) {
     }
     return menu;
   }
-  function place(menu, x, y) {
+  function place(menu, x, y, onClose) {
     screenEl.append(menu);
     current = menu;
+    currentOnClose = onClose ?? null;
     const maxX = Math.max(0, (screenEl.offsetWidth || 1024) - menu.offsetWidth);
     const maxY = Math.max(0, (screenEl.offsetHeight || 768) - menu.offsetHeight);
     menu.style.left = `${Math.min(x, maxX)}px`;
@@ -49,14 +54,15 @@ export function createMenus(screenEl, { sounds } = {}) {
     sounds?.play('menu');
     return menu;
   }
-  function open(anchorEl, items, { align = 'below' } = {}) {
+  /** onClose, if given, fires synchronously (from close()) the moment this menu stops being the open one. */
+  function open(anchorEl, items, { align = 'below', onClose } = {}) {
     close();
     const a = toLocal(anchorEl.getBoundingClientRect());
-    return place(build(items), a.x, align === 'below' ? a.y + a.h : a.y);
+    return place(build(items), a.x, align === 'below' ? a.y + a.h : a.y, onClose);
   }
-  function openAt(x, y, items) {
+  function openAt(x, y, items, onClose) {
     close();
-    return place(build(items), x, y);
+    return place(build(items), x, y, onClose);
   }
   return { open, openAt, close, get isOpen() { return current !== null; } };
 }
@@ -70,9 +76,8 @@ export function attachMenubar(barEl, menus, defs) {
     span.className = 'xp-menubar-item';
     span.textContent = name;
     span.addEventListener('click', () => {
-      menus.open(span, typeof items === 'function' ? items() : items);
       span.classList.add('open');
-      const check = setInterval(() => { if (!menus.isOpen) { span.classList.remove('open'); clearInterval(check); } }, 100);
+      menus.open(span, typeof items === 'function' ? items() : items, { onClose: () => span.classList.remove('open') });
     });
     barEl.append(span);
   }

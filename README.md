@@ -60,6 +60,7 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 - [ ] Turn Off, Restart, Stand By, Log Off all recover to a working desktop
 - [ ] `?mode=flat` letterboxes at any window size; phone width shows the notice
 - [ ] Mute persists across reload
+- [ ] resume.json (homepage) and resume-main.pdf agree on jobs/skills — re-run `npm run sync-resume` if Resume's CI has published a newer PDF
 
 ## Roadmap
 
@@ -74,4 +75,7 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 
 Code is MIT. Uses three.js (MIT) and XP.css (MIT). No Microsoft artwork,
 sounds, logos or card art are included; every icon, wallpaper, boot screen and
-sound is drawn or synthesized in this repository.
+sound is drawn or synthesized in this repository. XP.css bundles a "Pixelated
+MS Sans Serif" webfont, which is an original recreation and not Microsoft's
+real font file; it ships as part of that already-approved MIT dependency and
+is kept as-is.

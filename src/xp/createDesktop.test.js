@@ -55,6 +55,53 @@ describe('createDesktop', () => {
     expect(unlockSpy).not.toHaveBeenCalled();
   });
 
+  it('emits a sound event alongside every UI sound cue', () => {
+    const desktop = mount();
+    const played = [];
+    desktop.on('sound', (name) => played.push(name));
+    desktop.el.querySelector('.xp-start').click();
+    expect(played).toContain('menu');
+  });
+
+  it('closes an open Start menu and menubar menu on destroy, leaving no document-level listeners or intervals armed', () => {
+    const addSpy = vi.spyOn(document, 'addEventListener');
+    const removeSpy = vi.spyOn(document, 'removeEventListener');
+    const setIntervalSpy = vi.spyOn(globalThis, 'setInterval');
+
+    const desktop = mount();
+    desktop.setInteractive(true);
+
+    // Open the Start menu: StartMenu.js arms document pointerdown(capture)/keydown listeners.
+    desktop.el.querySelector('.xp-start').click();
+    expect(desktop.el.querySelector('.xp-startmenu').hidden).toBe(false);
+
+    // Open a window's menubar menu too: Menu.js's place() arms its own document
+    // pointerdown(capture) listener, and (pre-fix) attachMenubar started a polling
+    // setInterval per click that never cleared unless the menu was closed first.
+    desktop.ctx.registry.launch('notepad', { title: 'a.txt', text: 'hi' });
+    const fileItem = [...desktop.el.querySelectorAll('.xp-menubar-item')].find((el) => el.textContent === 'File');
+    fileItem.click();
+    expect(desktop.ctx.menus.isOpen).toBe(true);
+    // attachMenubar used to poll menus.isOpen via a 100ms setInterval per click; it should
+    // now use menus' onClose callback instead, so opening a menu starts no new interval.
+    expect(setIntervalSpy.mock.calls.some(([, delay]) => delay === 100)).toBe(false);
+
+    const netCalls = (type, capture) => {
+      const matches = ([callType, , opts]) => callType === type && Boolean(typeof opts === 'boolean' ? opts : opts?.capture) === capture;
+      return addSpy.mock.calls.filter(matches).length - removeSpy.mock.calls.filter(matches).length;
+    };
+
+    desktop.destroy();
+
+    // Net add/remove across the whole test must settle back to zero for every
+    // document-level listener type the desktop's lifetime could have armed.
+    expect(netCalls('pointerdown', true)).toBe(0);
+    expect(netCalls('keydown', false)).toBe(0);
+    // attachMenubar's onClose fires synchronously from menus.close() -- no polling interval involved.
+    expect(fileItem.classList.contains('open')).toBe(false);
+    expect(desktop.ctx.menus.isOpen).toBe(false);
+  });
+
   it('toggles interactivity and the CRT overlay', () => {
     const desktop = mount();
     expect(desktop.el.classList.contains('xp-interactive')).toBe(false);
