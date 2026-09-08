@@ -112,7 +112,8 @@ XPcomputer/
 - `xp/` has zero imports from `three` or `room/`. `createDesktop(rootEl, options)`
   mounts a complete 1024×768 desktop and returns a controller:
   `{ powerOn(), powerOff(), setInteractive(bool), on(event, fn), destroy() }`.
-  Events: `booted`, `shutdown`, `logoff`, `sound`.
+  Events: `booted`, `shutdown`, `logoff`, `sound`, `power` (fires on every boot-state
+  change with one of `booting`, `on`, `shutting-down`, `off`, `standby`, `logon`).
 - `room/` never imports from `xp/`. `createRoom(canvas, screenElement, options)`
   returns `{ focusScreen(), leaveScreen(), on(event, fn), setLowFx(bool), dispose() }`.
   Events: `pcClicked`, `screenFocused`, `screenLeft`.
@@ -212,9 +213,10 @@ fades out.
 - XP.css (MIT) provides Luna window chrome, buttons, menus, scrollbars, tabs.
 - Own SVG icon set drawn in the XP style (32 px and 16 px). Own wallpaper:
   an original rolling green hill under a blue sky as SVG.
-- Boot logo is a typographic recreation: the boot screen shows "Windows XP"
-  text with a four-color CSS flag shape and the sliding blue progress bar. No
-  Microsoft wordmark or logo bitmap is used.
+- Boot logo is our own recreation: an SVG waving four-colour flag (red, green,
+  blue, yellow) generated from a wave formula, beside "Windows XP" text and the
+  sliding blue progress bar. The Start button uses the same flag. No Microsoft
+  file is used.
 - Default XP cursor look via CSS `cursor` on the desktop element using our own
   small SVG cursors (arrow, hand); falls back to system cursors.
 
@@ -553,8 +555,10 @@ where `open` names an app id and payload. Explorer only walks this tree.
 ## 13. Licensing and assets
 
 - Code: MIT. Dependencies: three.js (MIT), XP.css (MIT), Vite/Vitest (MIT).
-- No Microsoft bitmaps, icons, wallpapers, sounds, fonts, or card art. Names
-  used in menus are generic ("Pinball", "Minesweeper", "Solitaire").
+- No Microsoft bitmaps, icons, wallpapers, sounds, fonts, or card art. The
+  four-colour flag is an original SVG drawing that is deliberately reminiscent
+  of the Windows mark; it is the one recognisable brand shape on the site.
+  Names used in menus are generic ("Pinball", "Minesweeper", "Solitaire").
 - README states this stance and credits XP.css and three.js.
 
 ## 14. Phases (each shippable)

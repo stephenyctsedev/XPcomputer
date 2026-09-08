@@ -1,4 +1,5 @@
 import { iconEl } from './icons/index.js';
+import { flagEl } from './icons/windowsFlag.js';
 
 export function formatClock(date) {
   const hours = date.getHours();
@@ -9,10 +10,11 @@ export function formatClock(date) {
 export function createTaskbar(rootEl, { wm, sounds, onStart, now = () => new Date() }) {
   rootEl.classList.add('xp-taskbar');
   rootEl.innerHTML = `
-    <button class="xp-start" type="button"><span class="xp-start-flag"><i></i><i></i><i></i><i></i></span>start</button>
+    <button class="xp-start" type="button"><span class="xp-start-flag"></span>start</button>
     <div class="xp-tasks"></div>
     <div class="xp-tray"><button class="xp-tray-mute" type="button" title="Volume"></button><span class="xp-clock"></span></div>
     <div class="xp-balloon" hidden><button class="xp-balloon-close" type="button" aria-label="Close">×</button><div class="xp-balloon-title"></div><div class="xp-balloon-text"></div></div>`;
+  rootEl.querySelector('.xp-start-flag').append(flagEl(18));
   const start = rootEl.querySelector('.xp-start');
   const tasks = rootEl.querySelector('.xp-tasks');
   const clock = rootEl.querySelector('.xp-clock');

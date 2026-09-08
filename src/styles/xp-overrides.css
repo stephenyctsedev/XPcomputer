@@ -108,10 +108,7 @@
 .xp-taskbar { position: absolute; left: 0; right: 0; bottom: 0; height: 30px; display: flex; align-items: stretch; background: linear-gradient(#3168d5 0%, #4993e6 4%, #2b5fd3 8%, #245edb 60%, #1f4fbf 100%); border-top: 1px solid #0f2f8a; font-size: 11px; color: #fff; user-select: none; z-index: 99999; }
 .xp-start { display: flex; align-items: center; gap: 6px; padding: 0 22px 0 8px; margin: 0; border: 0; border-radius: 0 12px 12px 0; background: linear-gradient(#3d9b3d, #2f7d2f 60%, #266b26); color: #fff; font: italic bold 15px/1 "Trebuchet MS", Tahoma, sans-serif; text-shadow: 1px 1px 1px #123; box-shadow: inset 1px 1px 0 rgba(255,255,255,.35), 2px 0 4px rgba(0,0,0,.35); min-width: 0; min-height: 0; cursor: default; }
 .xp-start:hover, .xp-start.active { background: linear-gradient(#57b857, #3d9b3d 60%, #2f7d2f); }
-.xp-start-flag { display: grid; grid-template-columns: 8px 8px; gap: 1px; transform: skewY(-8deg); }
-.xp-start-flag i { display: block; width: 8px; height: 7px; border-radius: 1px; }
-.xp-start-flag i:nth-child(1) { background: #ff1493; } .xp-start-flag i:nth-child(2) { background: #00d9ff; }
-.xp-start-flag i:nth-child(3) { background: #b800ff; } .xp-start-flag i:nth-child(4) { background: #1eff00; }
+.xp-start-flag { display: inline-block; line-height: 0; filter: drop-shadow(1px 1px 1px rgba(0,0,0,.5)); }
 .xp-tasks { flex: 1; display: flex; align-items: center; gap: 3px; padding: 0 6px; overflow: hidden; }
 .xp-task { display: flex; align-items: center; gap: 6px; height: 22px; width: 160px; padding: 0 8px; border: 1px solid #1a3f9e; border-radius: 3px; background: linear-gradient(#4b8ef0, #3a7ae0); color: #fff; font: inherit; box-shadow: inset 1px 1px 0 rgba(255,255,255,.3); min-width: 0; min-height: 0; cursor: default; }
 .xp-task-label { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
@@ -153,19 +150,21 @@
 /* ---- Boot / power ---- */
 .xp-boot { position: absolute; inset: 0; z-index: 200000; background: #000; color: #ccc; font-family: "Lucida Console", Consolas, monospace; cursor: default; }
 .xp-boot > * { position: absolute; inset: 0; }
+/* [hidden] is UA-origin; the panes' own author display:flex/grid rules override it at equal specificity. Re-assert display:none for hidden panes at higher specificity so hiding actually works. */
+.xp-boot > *[hidden] { display: none; }
 .xp-off { background: #000; display: grid; place-items: center; }
 .xp-off-hint { color: #2a2a2a; font: 13px Tahoma, sans-serif; letter-spacing: 1px; }
 .xp-bios { margin: 0; padding: 24px 28px; font-size: 15px; line-height: 1.5; color: #c8c8c8; white-space: pre-wrap; }
 .xp-bios::after { content: "_"; animation: xp-blink 1s steps(1) infinite; }
 @keyframes xp-blink { 50% { opacity: 0; } }
 .xp-bootlogo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 44px; background: #000; }
-.xp-bootlogo-brand { display: flex; align-items: center; gap: 18px; }
+.xp-bootlogo-brand { display: flex; align-items: center; gap: 24px; }
 .xp-bootlogo-text { font: 300 46px/1 "Trebuchet MS", "Franklin Gothic Medium", Tahoma, sans-serif; color: #fff; letter-spacing: -1px; }
 .xp-bootlogo-text b { font-weight: bold; color: #f0a028; font-size: 30px; vertical-align: top; margin-left: 2px; }
-.xp-flag { display: grid; grid-template-columns: 26px 26px; gap: 3px; transform: skewY(-10deg) rotate(-4deg); filter: drop-shadow(0 0 6px rgba(255,255,255,.35)); }
-.xp-flag i { display: block; width: 26px; height: 22px; border-radius: 3px; }
-.xp-flag i:nth-child(1) { background: #ff1493; } .xp-flag i:nth-child(2) { background: #00d9ff; }
-.xp-flag i:nth-child(3) { background: #b800ff; } .xp-flag i:nth-child(4) { background: #1eff00; }
+.xp-flag { display: block; line-height: 0; animation: xp-logo-in .7s ease-out both; }
+.xp-winflag-host { display: inline-block; line-height: 0; vertical-align: middle; }
+.xp-winflag-glow { filter: drop-shadow(0 0 10px rgba(255,255,255,.28)); }
+@keyframes xp-logo-in { from { opacity: 0; transform: translateY(6px) scale(.96); } to { opacity: 1; transform: none; } }
 .xp-progress { width: 170px; height: 14px; border: 1px solid #8a8a8a; border-radius: 3px; overflow: hidden; position: relative; }
 .xp-progress i { position: absolute; top: 2px; bottom: 2px; width: 9px; background: linear-gradient(#5b8be8, #2a5cc8); border-radius: 1px; animation: xp-progress 2s linear infinite; }
 .xp-progress i:nth-child(2) { animation-delay: .13s; } .xp-progress i:nth-child(3) { animation-delay: .26s; }
@@ -181,7 +180,7 @@
 .xp-logon-avatar { display: grid; place-items: center; width: 48px; height: 48px; background: #fff; border-radius: 4px; }
 .xp-shutdown { display: grid; place-items: center; }
 .xp-shutdown-text { font-size: 18px; }
-@media (prefers-reduced-motion: reduce) { .xp-progress i, .xp-bios::after { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .xp-progress i, .xp-bios::after, .xp-flag { animation: none; } }
 
 /* ---- Screen root ---- */
 .xp-screen { position: relative; width: 1024px; height: 768px; overflow: hidden; background: #000; font-family: Tahoma, "Trebuchet MS", Verdana, sans-serif; font-size: 11px; color: #000; outline: none;

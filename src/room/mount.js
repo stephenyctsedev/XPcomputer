@@ -21,7 +21,7 @@ export async function mountRoom(app, screenEl, desktop, { reducedMotion = false 
   // and its still-running rAF loop fights the flat stage for control of screenEl.
   let room;
   let onKeydown;
-  let offBooted;
+  let offPower;
   let offShutdown;
   try {
     room = createRoom(container, screenEl, { reducedMotion, lowFx: storage.get(LOWFX_KEY) === '1' });
@@ -62,12 +62,14 @@ export async function mountRoom(app, screenEl, desktop, { reducedMotion = false 
     };
     window.addEventListener('keydown', onKeydown, true);
 
-    offBooted = desktop.on('booted', () => room.setPower(true));
-    offShutdown = desktop.on('shutdown', () => { room.setPower(false); room.leaveScreen(); });
-    room.setPower(desktop.isOn);
+    // The CRT lights up the moment the PC starts (BIOS, logo, welcome), not only once the desktop is up.
+    const lit = (state) => state !== 'off' && state !== 'standby';
+    offPower = desktop.on('power', (state) => room.setPower(lit(state)));
+    offShutdown = desktop.on('shutdown', () => room.leaveScreen());
+    room.setPower(lit(desktop.powerState));
   } catch (err) {
     if (onKeydown) window.removeEventListener('keydown', onKeydown, true);
-    offBooted?.();
+    offPower?.();
     offShutdown?.();
     room?.dispose();
     container.remove();
@@ -82,7 +84,7 @@ export async function mountRoom(app, screenEl, desktop, { reducedMotion = false 
     get state() { return room.state; },
     dispose() {
       window.removeEventListener('keydown', onKeydown, true);
-      offBooted();
+      offPower();
       offShutdown();
       room.dispose();
       container.remove();

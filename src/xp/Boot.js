@@ -1,4 +1,5 @@
 import { iconEl } from './icons/index.js';
+import { flagEl } from './icons/windowsFlag.js';
 
 const BIOS_LINES = [
   'XPcomputer BIOS v1.0   (C) 2026 Stephen Tse',
@@ -18,7 +19,7 @@ export function createBoot(screenEl, { sounds, reducedMotion = false, onState, o
   layer.innerHTML = `
     <pre class="xp-bios" hidden></pre>
     <div class="xp-bootlogo" hidden>
-      <div class="xp-bootlogo-brand"><span class="xp-flag"><i></i><i></i><i></i><i></i></span><span class="xp-bootlogo-text">Windows <b>XP</b></span></div>
+      <div class="xp-bootlogo-brand"><span class="xp-flag"></span><span class="xp-bootlogo-text">Windows <b>XP</b></span></div>
       <div class="xp-progress"><i></i><i></i><i></i></div>
       <div class="xp-bootlogo-foot">Stephen Tse Edition</div>
     </div>
@@ -30,6 +31,7 @@ export function createBoot(screenEl, { sounds, reducedMotion = false, onState, o
     <div class="xp-shutdown" hidden><div class="xp-shutdown-text">Windows is shutting down...</div></div>
     <div class="xp-off" hidden><span class="xp-off-hint">click to turn on</span></div>`;
   layer.querySelector('.xp-logon-avatar').append(iconEl('user', 40));
+  layer.querySelector('.xp-flag').append(flagEl(110, { glow: true }));
   screenEl.append(layer);
 
   const panes = Object.fromEntries(['bios', 'bootlogo', 'welcome', 'logon', 'shutdown', 'off'].map((k) => [k, layer.querySelector(`.xp-${k}`)]));

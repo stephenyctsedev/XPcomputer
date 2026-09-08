@@ -23,6 +23,7 @@ describe('createTaskbar', () => {
 
   it('shows the clock and fires onStart', () => {
     expect(bar.el.querySelector('.xp-clock').textContent).toBe('9:05 AM');
+    expect(bar.el.querySelectorAll('.xp-start .xp-start-flag svg.xp-winflag .xp-winflag-pane')).toHaveLength(4);
     bar.el.querySelector('.xp-start').click();
     expect(started).toBe(1);
   });

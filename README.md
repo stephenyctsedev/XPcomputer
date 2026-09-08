@@ -69,6 +69,7 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 - [ ] Resize while focused re-fits the screen; Low FX toggles and persists; hidden tab pauses rendering
 - [ ] Phone emulation and `?mode=flat` show the flat desktop
 - [ ] resume.json (homepage) and resume-main.pdf agree on jobs/skills — re-run `npm run sync-resume` if Resume's CI has published a newer PDF
+- [ ] Boot logo shows the rippling four-colour flag beside "Windows XP"; Start button flag matches; in room mode the CRT glows from the BIOS text onward
 
 ## Roadmap
 
@@ -81,9 +82,7 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 
 ## Licensing
 
-Code is MIT. Uses three.js (MIT) and XP.css (MIT). No Microsoft artwork,
-sounds, logos or card art are included; every icon, wallpaper, boot screen and
-sound is drawn or synthesized in this repository. XP.css bundles a "Pixelated
+Code is MIT. Uses three.js (MIT) and XP.css (MIT). No Microsoft files are included: the four-colour boot flag is our own SVG drawing in the spirit of the Windows logo, and every other icon, wallpaper, boot screen and sound is drawn or synthesized in this repository. XP.css bundles a "Pixelated
 MS Sans Serif" webfont, which is an original recreation and not Microsoft's
 real font file; it ships as part of that already-approved MIT dependency and
 is kept as-is.

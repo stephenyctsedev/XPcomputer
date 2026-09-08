@@ -12,13 +12,14 @@ function makeFakeRoom(state) {
   return { focusScreen: vi.fn(), leaveScreen: vi.fn(), setPower: vi.fn(), setLowFx: vi.fn(), state, on: vi.fn(() => vi.fn()), dispose: vi.fn() };
 }
 
-function makeDesktop(offBooted, offShutdown) {
+function makeDesktop(offPower, offShutdown) {
   return {
     ctx: { storage: { get: () => null, set: () => {} } },
     isOn: false,
+    powerState: 'off',
     powerOn: vi.fn(),
     setInteractive: vi.fn(),
-    on: vi.fn((event) => (event === 'booted' ? offBooted : offShutdown)),
+    on: vi.fn((event) => (event === 'power' ? offPower : offShutdown)),
   };
 }
 
@@ -29,13 +30,13 @@ describe('mountRoom teardown', () => {
     const screenEl = document.createElement('div');
     const fakeRoom = makeFakeRoom('screen');
     createRoom.mockReturnValue(fakeRoom);
-    const offBooted = vi.fn();
+    const offPower = vi.fn();
     const offShutdown = vi.fn();
-    const desktop = makeDesktop(offBooted, offShutdown);
+    const desktop = makeDesktop(offPower, offShutdown);
 
     const returned = await mountRoom(app, screenEl, desktop, {});
 
-    expect(desktop.on).toHaveBeenCalledWith('booted', expect.any(Function));
+    expect(desktop.on).toHaveBeenCalledWith('power', expect.any(Function));
     expect(desktop.on).toHaveBeenCalledWith('shutdown', expect.any(Function));
 
     // The Escape handler is live before dispose.
@@ -44,7 +45,7 @@ describe('mountRoom teardown', () => {
 
     returned.dispose();
 
-    expect(offBooted).toHaveBeenCalledTimes(1);
+    expect(offPower).toHaveBeenCalledTimes(1);
     expect(offShutdown).toHaveBeenCalledTimes(1);
     expect(fakeRoom.dispose).toHaveBeenCalledTimes(1);
 
@@ -96,28 +97,56 @@ describe('mountRoom teardown', () => {
     const screenEl = document.createElement('div');
     const fakeRoom = makeFakeRoom('overview');
     createRoom.mockReturnValue(fakeRoom);
-    const offBooted = vi.fn();
+    const offPower = vi.fn();
     const failure = new Error('desktop subscription boom');
-    // 'booted' subscribes fine; 'shutdown' (wired later in mountRoom) throws, simulating an
+    // 'power' subscribes fine; 'shutdown' (wired later in mountRoom) throws, simulating an
     // exception that happens after createRoom() has already returned a live room.
     const desktop = {
       ctx: { storage: { get: () => null, set: () => {} } },
       isOn: false,
+      powerState: 'off',
       powerOn: vi.fn(),
       setInteractive: vi.fn(),
       on: vi.fn((event) => {
-        if (event === 'booted') return offBooted;
+        if (event === 'power') return offPower;
         throw failure;
       }),
     };
 
     await expect(mountRoom(app, screenEl, desktop, {})).rejects.toBe(failure);
 
-    // The half-started room's own teardown ran, its 'booted' subscription was released, and the
+    // The half-started room's own teardown ran, its 'power' subscription was released, and the
     // container it lived in is gone — no half-started room survives to fight flat mode for
     // control of screenEl on its (frozen, but still-registered) render loop.
     expect(fakeRoom.dispose).toHaveBeenCalledTimes(1);
-    expect(offBooted).toHaveBeenCalledTimes(1);
+    expect(offPower).toHaveBeenCalledTimes(1);
     expect(app.querySelector('.room')).toBeNull();
+  });
+
+  it('lights the CRT for every powered boot state and darkens it for off and stand by', async () => {
+    document.body.innerHTML = '<div id="app"></div>';
+    const app = document.querySelector('#app');
+    const screenEl = document.createElement('div');
+    const fakeRoom = makeFakeRoom('overview');
+    createRoom.mockReturnValue(fakeRoom);
+    const handlers = {};
+    const desktop = { ...makeDesktop(vi.fn(), vi.fn()), on: vi.fn((event, fn) => { handlers[event] = fn; return vi.fn(); }) };
+
+    await mountRoom(app, screenEl, desktop, {});
+    expect(fakeRoom.setPower).toHaveBeenLastCalledWith(false);      // powerState 'off' at mount
+    handlers.power('booting');
+    expect(fakeRoom.setPower).toHaveBeenLastCalledWith(true);
+    handlers.power('shutting-down');
+    expect(fakeRoom.setPower).toHaveBeenLastCalledWith(true);
+    handlers.power('on');
+    expect(fakeRoom.setPower).toHaveBeenLastCalledWith(true);
+    handlers.power('standby');
+    expect(fakeRoom.setPower).toHaveBeenLastCalledWith(false);
+    handlers.power('logon');
+    expect(fakeRoom.setPower).toHaveBeenLastCalledWith(true);
+    handlers.power('off');
+    expect(fakeRoom.setPower).toHaveBeenLastCalledWith(false);
+    handlers.shutdown();
+    expect(fakeRoom.leaveScreen).toHaveBeenCalledTimes(1);
   });
 });

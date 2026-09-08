@@ -16,6 +16,13 @@ describe('boot sequence', () => {
   });
   afterEach(() => vi.useRealTimers());
 
+  it('shows the four-colour flag beside the Windows XP wordmark on the logo screen', () => {
+    const logo = layer().querySelector('.xp-bootlogo');
+    expect(logo.querySelectorAll('.xp-flag svg.xp-winflag .xp-winflag-pane')).toHaveLength(4);
+    expect(logo.querySelector('.xp-flag i')).toBeNull();
+    expect(logo.querySelector('.xp-bootlogo-text').textContent.replace(/\s+/g, ' ').trim()).toBe('Windows XP');
+  });
+
   it('starts off, asks for power on click, then walks bios -> logo -> welcome -> on', async () => {
     expect(boot.state).toBe('off');
     expect(visible()).toEqual(['xp-off']);

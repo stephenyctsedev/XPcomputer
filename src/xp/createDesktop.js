@@ -73,7 +73,7 @@ export function createDesktop(rootEl, { resume, pdfHref, repoUrl, storage = safe
     { id: 'recycle', label: 'Recycle Bin', icon: 'recycle', corner: true, launch: launch('explorer', { path: PATHS.recycleBin }) },
   ]);
 
-  const boot = createBoot(rootEl, { sounds, reducedMotion, onState: (s) => { rootEl.dataset.power = s; }, onPowerRequest: () => powerOn() });
+  const boot = createBoot(rootEl, { sounds, reducedMotion, onState: (s) => { rootEl.dataset.power = s; emit('power', s); }, onPowerRequest: () => powerOn() });
 
   function runCommand(command) {
     const key = command.trim().toLowerCase().replace(/\.exe$/, '');

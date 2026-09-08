@@ -110,4 +110,17 @@ describe('createDesktop', () => {
     expect(desktop.el.classList.contains('xp-interactive')).toBe(true);
     expect(desktop.el.querySelector('.xp-crt').hidden).toBe(true);
   });
+
+  it('emits a power event for every boot state', async () => {
+    const desktop = mount();
+    const states = [];
+    desktop.on('power', (s) => states.push(s));
+    const p = desktop.powerOn();
+    expect(states).toEqual(['booting']);
+    await vi.advanceTimersByTimeAsync(3000);
+    await p;
+    expect(states).toEqual(['booting', 'on']);
+    expect(desktop.el.dataset.power).toBe('on');
+    expect(desktop.powerState).toBe('on');
+  });
 });
