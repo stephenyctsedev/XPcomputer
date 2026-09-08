@@ -43,9 +43,12 @@ export function openMinesweeper(ctx) {
   const face = body.querySelector('.ms-face');
   const minesLed = body.querySelector('.ms-mines');
   const timeLed = body.querySelector('.ms-time');
-  const win = wm.open({ appId: 'winmine', title: 'Minesweeper', icon: 'mine', width: 200, height: 260, minWidth: 120, minHeight: 100, resizable: false, content: body, onClose: () => { stopTimer(); document.removeEventListener('pointerup', onDocumentUp); } });
+  const win = wm.open({ appId: 'winmine', title: 'Minesweeper', icon: 'mine', width: 200, height: 260, minWidth: 120, minHeight: 100, resizable: false, content: body, onClose: () => { stopTimer(); document.removeEventListener('pointerup', onDocumentUp); document.removeEventListener('keydown', onDocumentKeyDown); } });
 
-  const led = (n) => String(Math.max(-99, Math.min(999, n))).padStart(3, '0');
+  const led = (n) => {
+    const v = Math.max(-99, Math.min(999, n));
+    return v < 0 ? `-${String(-v).padStart(2, '0')}` : String(v).padStart(3, '0');
+  };
   const setFace = (name) => { face.innerHTML = FACES[name]; };
   const rc = (cellEl) => { const i = Number(cellEl.dataset.i); return [Math.floor(i / game.cols), i % game.cols]; };
   function stopTimer() { clearInterval(timer); timer = null; }
@@ -115,7 +118,8 @@ export function openMinesweeper(ctx) {
       content.className = 'xp-msgbox';
       content.innerHTML = `<div class="xp-msgbox-text">You have the fastest time for ${levelName} level. Please enter your name.</div><input type="text" maxlength="32" value="Anonymous"><div class="xp-msgbox-buttons"><button type="button" class="default">OK</button></div>`;
       const input = content.querySelector('input');
-      const dlg = wm.open({ appId: 'dialog', title: 'Congratulations', icon: 'mine', dialog: true, width: 300, height: 150, x: win.bounds.x + 20, y: win.bounds.y + 60, content, onClose: () => resolve(input.value.trim() || 'Anonymous') });
+      win.el.classList.add('xp-inert');
+      const dlg = wm.open({ appId: 'dialog', title: 'Congratulations', icon: 'mine', dialog: true, width: 300, height: 150, x: win.bounds.x + 20, y: win.bounds.y + 60, content, onClose: () => { win.el.classList.remove('xp-inert'); resolve(input.value.trim() || 'Anonymous'); } });
       content.querySelector('button').addEventListener('click', () => dlg.close());
       input.addEventListener('keydown', (e) => { if (e.key === 'Enter') dlg.close(); });
       setTimeout(() => input.select(), 0);
@@ -124,8 +128,10 @@ export function openMinesweeper(ctx) {
   async function recordBest() {
     const best = loadBest();
     if (best[levelName] && best[levelName].time <= seconds) return;
+    const time = seconds;
+    const level = levelName;
     const name = await promptName();
-    best[levelName] = { time: seconds, name };
+    best[level] = { time, name };
     saveBest(best);
   }
   function showBestTimes() {
@@ -178,9 +184,12 @@ export function openMinesweeper(ctx) {
     const [r, c] = rc(cellEl);
     afterMove(mode === 'chord' ? game.chord(r, c) : game.reveal(r, c));
   }
+  function onDocumentKeyDown(e) {
+    if (e.key === 'F2' && win.isFocused) { e.preventDefault(); newGame(); }
+  }
   document.addEventListener('pointerup', onDocumentUp);
   face.addEventListener('click', newGame);
-  body.addEventListener('keydown', (e) => { if (e.key === 'F2') { e.preventDefault(); newGame(); } });
+  document.addEventListener('keydown', onDocumentKeyDown);
 
   newGame();
   return win;
