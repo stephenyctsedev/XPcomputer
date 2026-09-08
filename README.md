@@ -46,7 +46,6 @@ Pushing to `main` runs tests, builds, and deploys to GitHub Pages
 - 3D room: drag to orbit, wheel to zoom, click the PC to sit down at it, Escape or "Back to room" to stand up.
 - "Low FX" (bottom right) turns bloom off and caps resolution for slower machines; the choice is remembered.
 - Phones, tablets and browsers without WebGL2 skip the room and get the desktop full screen. Force a mode with `?mode=room` or `?mode=flat`.
-- Minesweeper: left click reveals, right click flags (then ?), middle click or Shift+click chords, F2 new game. Best times are stored in the browser.
 
 ## Manual QA checklist
 
@@ -71,13 +70,12 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 - [ ] Phone emulation and `?mode=flat` show the flat desktop
 - [ ] resume.json (homepage) and resume-main.pdf agree on jobs/skills — re-run `npm run sync-resume` if Resume's CI has published a newer PDF
 - [ ] Boot logo shows the rippling four-colour flag beside "Windows XP"; Start button flag matches; in room mode the CRT glows from the BIOS text onward
-- [ ] Minesweeper: three levels resize the window; win and loss paths; best-time prompt; sounds and mute
 
 ## Roadmap
 
 1. Skeleton, resume pipeline, XP shell, IE/Explorer/Notepad (this plan) — done when the checklist passes
 2. ~~three.js cyberpunk bedroom with the CSS3D screen~~ done
-3. ~~Minesweeper~~ done
+3. Minesweeper
 4. Solitaire
 5. Pinball
 6. Polish and performance pass
