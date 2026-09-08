@@ -1,0 +1,4 @@
+html, body { margin: 0; height: 100%; background: #000; color: #ddd; font-family: Tahoma, Verdana, sans-serif; }
+#app { position: fixed; inset: 0; overflow: hidden; }
+.flat-stage { position: absolute; inset: 0; display: grid; place-items: center; background: #000; }
+.flat-notice { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: 12px; color: #777; }
