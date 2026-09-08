@@ -23,7 +23,6 @@ export function createEffects(renderer, scene, camera, { lowFx = false } = {}) {
     renderer.setSize(w, h, false);
     composer.setPixelRatio(ratio);
     composer.setSize(w, h);
-    bloom.setSize(Math.ceil(w / 2), Math.ceil(h / 2));
   }
 
   return {
