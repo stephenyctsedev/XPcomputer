@@ -31,6 +31,12 @@ export function createEffects(renderer, scene, camera, { lowFx = false } = {}) {
     setLowFx(value) { low = Boolean(value); setSize(width, height); },
     get lowFx() { return low; },
     bloom,
-    dispose() { composer.dispose(); },
+    dispose() {
+      // EffectComposer.dispose() only frees its own two internal render targets + copy pass —
+      // it never iterates composer.passes, so UnrealBloomPass's own 11 render targets and
+      // blur/composite materials would otherwise leak on every room mount/unmount cycle.
+      for (const pass of composer.passes) pass.dispose?.();
+      composer.dispose();
+    },
   };
 }

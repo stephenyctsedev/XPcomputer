@@ -74,4 +74,50 @@ describe('mountRoom teardown', () => {
     expect(fakeRoom.leaveScreen).toHaveBeenCalledTimes(1);
     expect(fakeRoom.setLowFx).toHaveBeenCalledWith(true);
   });
+
+  it('dispose() removes the .room container from the DOM on the success path (matching the error path)', async () => {
+    document.body.innerHTML = '<div id="app"></div>';
+    const app = document.querySelector('#app');
+    const screenEl = document.createElement('div');
+    const fakeRoom = makeFakeRoom('overview');
+    createRoom.mockReturnValue(fakeRoom);
+    const desktop = makeDesktop(vi.fn(), vi.fn());
+
+    const returned = await mountRoom(app, screenEl, desktop, {});
+
+    expect(app.querySelector('.room')).not.toBeNull();
+    returned.dispose();
+    expect(app.querySelector('.room')).toBeNull();
+  });
+
+  it('tears down whatever was created so far and removes the container if setup throws after createRoom() succeeds', async () => {
+    document.body.innerHTML = '<div id="app"></div>';
+    const app = document.querySelector('#app');
+    const screenEl = document.createElement('div');
+    const fakeRoom = makeFakeRoom('overview');
+    createRoom.mockReturnValue(fakeRoom);
+    const offBooted = vi.fn();
+    const failure = new Error('desktop subscription boom');
+    // 'booted' subscribes fine; 'shutdown' (wired later in mountRoom) throws, simulating an
+    // exception that happens after createRoom() has already returned a live room.
+    const desktop = {
+      ctx: { storage: { get: () => null, set: () => {} } },
+      isOn: false,
+      powerOn: vi.fn(),
+      setInteractive: vi.fn(),
+      on: vi.fn((event) => {
+        if (event === 'booted') return offBooted;
+        throw failure;
+      }),
+    };
+
+    await expect(mountRoom(app, screenEl, desktop, {})).rejects.toBe(failure);
+
+    // The half-started room's own teardown ran, its 'booted' subscription was released, and the
+    // container it lived in is gone — no half-started room survives to fight flat mode for
+    // control of screenEl on its (frozen, but still-registered) render loop.
+    expect(fakeRoom.dispose).toHaveBeenCalledTimes(1);
+    expect(offBooted).toHaveBeenCalledTimes(1);
+    expect(app.querySelector('.room')).toBeNull();
+  });
 });

@@ -8,6 +8,20 @@ import { createEffects } from './Effects.js';
 import { createInteraction } from './Interaction.js';
 import { makeRoomTextures } from './textures.js';
 
+/** Dispose every geometry/material (and any map/emissiveMap texture they hold) under `root`. */
+function disposeSceneResources(root) {
+  root.traverse((node) => {
+    node.geometry?.dispose();
+    if (!node.material) return;
+    const materials = Array.isArray(node.material) ? node.material : [node.material];
+    for (const material of materials) {
+      material.map?.dispose();
+      material.emissiveMap?.dispose();
+      material.dispose();
+    }
+  });
+}
+
 export function createRoom(container, screenElement, { reducedMotion = false, lowFx = false } = {}) {
   const listeners = new Map();
   const on = (event, fn) => { if (!listeners.has(event)) listeners.set(event, new Set()); listeners.get(event).add(fn); return () => listeners.get(event).delete(fn); };
@@ -63,9 +77,10 @@ export function createRoom(container, screenElement, { reducedMotion = false, lo
   const clock = new THREE.Clock();
   let running = false;
   let frames = 0;
+  let raf = 0;
   const frame = () => {
     if (!running) return;
-    requestAnimationFrame(frame);
+    raf = requestAnimationFrame(frame);
     const dt = Math.min(clock.getDelta(), 0.05);
     const t = clock.elapsedTime;
     rig.update(dt);
@@ -76,7 +91,16 @@ export function createRoom(container, screenElement, { reducedMotion = false, lo
     if (++frames === 2) emit('firstFrame');
   };
   const start = () => { if (running) return; running = true; clock.getDelta(); frame(); };
-  const stop = () => { running = false; };
+  // Cancel the outstanding rAF handle explicitly: per spec a callback already queued when the
+  // document becomes hidden is RETAINED (not dropped) and still fires on the tab resuming, so
+  // relying on the `running` flag alone lets that stale callback schedule its own next frame
+  // (via requestAnimationFrame(frame) above) racing the newly-started loop — compounding on
+  // every subsequent hide/show cycle.
+  const stop = () => {
+    running = false;
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+  };
   const onVisibility = () => (document.hidden ? stop() : start());
   document.addEventListener('visibilitychange', onVisibility);
   start();
@@ -95,6 +119,7 @@ export function createRoom(container, screenElement, { reducedMotion = false, lo
       interaction.dispose();
       controls.dispose();
       effects.dispose();
+      disposeSceneResources(scene);
       renderer.dispose();
       container.replaceChildren();
     },
