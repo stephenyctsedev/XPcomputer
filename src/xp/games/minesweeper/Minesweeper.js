@@ -64,6 +64,7 @@ export function openMinesweeper(ctx) {
 
   function newGame() {
     stopTimer();
+    pressing = null; // drop any in-progress press so a stale pointerup can't act on the fresh grid
     seconds = 0;
     timeLed.textContent = led(0);
     const level = LEVELS[levelName];
@@ -77,6 +78,7 @@ export function openMinesweeper(ctx) {
       cell.type = 'button';
       cell.className = 'ms-cell';
       cell.dataset.i = String(i);
+      cell.tabIndex = -1; // mouse-only, as the original was; keep up to 480 unlabeled cells out of tab order
       grid.append(cell);
     }
     win.resize(level.cols * CELL + FRAME_W, level.rows * CELL + FRAME_H);
@@ -107,10 +109,10 @@ export function openMinesweeper(ctx) {
     minesLed.textContent = led(game.minesLeft);
     if (game.state === 'playing' && !timer) startTimer();
     if (game.state === 'lost') { stopTimer(); setFace('dead'); sounds.play('mineBoom'); }
-    if (game.state === 'won') { stopTimer(); setFace('cool'); sounds.play('win'); recordBest(); }
+    if (game.state === 'won') { stopTimer(); setFace('cool'); sounds.play('win'); recordBest().catch(() => {}); }
   }
 
-  const loadBest = () => { try { return JSON.parse(storage.get(BEST_KEY) ?? '{}') ?? {}; } catch { return {}; } };
+  const loadBest = () => { try { const v = JSON.parse(storage.get(BEST_KEY) ?? '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch { return {}; } };
   const saveBest = (best) => storage.set(BEST_KEY, JSON.stringify(best));
   function promptName() {
     return new Promise((resolve) => {
@@ -165,7 +167,15 @@ export function openMinesweeper(ctx) {
   grid.addEventListener('pointerdown', (e) => {
     const cellEl = e.target.closest('.ms-cell');
     if (!cellEl || !game || game.state === 'won' || game.state === 'lost') return;
-    if (e.button === 2) { afterMove(game.toggleMark(...rc(cellEl))); sounds.play('click'); return; }
+    if (e.button === 2) {
+      // A left (or middle) button already held on this cell means this right-down is the second
+      // half of a left-then-right chord gesture, not a plain right-click -- upgrade in place
+      // instead of toggling a mark. (Right-then-left and middle-click are handled by the
+      // e.buttons === 3 / e.button === 1 checks in the branch below, since those gestures reach
+      // this point with `pressing` still unset.)
+      if (pressing) { pressing = 'chord'; setFace('oh'); cellEl.classList.add('pressed'); return; }
+      afterMove(game.toggleMark(...rc(cellEl))); sounds.play('click'); return;
+    }
     if (e.button === 0 || e.button === 1) {
       pressing = e.button === 1 || e.buttons === 3 || e.shiftKey ? 'chord' : 'reveal';
       setFace('oh');

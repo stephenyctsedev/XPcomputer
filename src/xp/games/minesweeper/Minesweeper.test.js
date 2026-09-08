@@ -134,4 +134,108 @@ describe('Minesweeper window', () => {
     expect(best.beginner).toEqual({ time: 5, name: 'Anonymous' });
     expect(best.intermediate).toBeUndefined();
   });
+
+  it('creates grid cells outside the tab order, since Minesweeper stays mouse-only, while the face button stays reachable', () => {
+    const win = openMinesweeper(ctx);
+    const cell0 = win.el.querySelector('.ms-cell[data-i="0"]');
+    expect(cell0.tabIndex).toBe(-1);
+    expect(win.el.querySelector('.ms-face').tabIndex).toBe(0);
+  });
+
+  it('chords on release after a left-then-right press sequence, not just right-then-left', () => {
+    // Engineer a board where mines land at exactly {30, 32, 49, 63-69} so cell 40 (the first,
+    // "safe" reveal) ends up adjacent to exactly 3 mines (30, 32, 49) with 5 other unrevealed,
+    // unflagged, non-cascading neighbors (31, 39, 41, 48, 50) -- a chord target with no risk of
+    // flooding the rest of the board. Derived by feeding engine.js's placeMines() Fisher-Yates
+    // shuffle a sequence of Math.random() values chosen so the shuffle moves exactly these
+    // values into the first 10 slots of the mine pool (order doesn't matter, membership does).
+    function randomSequenceForMines(total, safeIndex, targetMines) {
+      const pool = [];
+      for (let i = 0; i < total; i++) if (i !== safeIndex) pool.push(i);
+      const targets = new Set(targetMines);
+      const seq = [];
+      for (let k = 0; k < targetMines.length; k++) {
+        const j = pool.findIndex((v, idx) => idx >= k && targets.has(v));
+        const span = pool.length - k;
+        seq.push((j - k + 0.5) / span); // lands squarely inside the bucket Math.floor() maps to j
+        [pool[k], pool[j]] = [pool[j], pool[k]];
+      }
+      return seq;
+    }
+    const seq = randomSequenceForMines(81, 40, [30, 32, 49, 63, 64, 65, 66, 67, 68, 69]);
+    const spy = vi.spyOn(Math, 'random');
+    seq.forEach((v) => spy.mockReturnValueOnce(v));
+
+    const win = openMinesweeper(ctx);
+    const cellEls = win.el.querySelectorAll('.ms-cell');
+    const target = cellEls[40];
+
+    press(target, 0, 1);
+    release(target, 0);
+    expect(target.classList.contains('revealed')).toBe(true);
+
+    // Flag the 3 mines around the target so its "3" is satisfied.
+    press(cellEls[30], 2, 2);
+    press(cellEls[32], 2, 2);
+    press(cellEls[49], 2, 2);
+    expect(win.el.querySelector('.ms-mines').textContent).toBe('007');
+
+    // Left down, then right down while left is still held -- matching real browser event order
+    // (and the resulting `buttons` bitmask) for a physical left-then-right click on one cell.
+    press(target, 0, 1);
+    press(target, 2, 3);
+    release(target, 0);
+
+    // A chord reveals the target's remaining unrevealed, unflagged neighbors. Pre-fix, the
+    // right-down unconditionally re-toggles a mark (a no-op here, since the cell is already
+    // revealed) and never upgrades `pressing` to 'chord', so release calls reveal() on an
+    // already-revealed cell -- also a no-op -- and none of this happens.
+    expect(cellEls[31].classList.contains('revealed')).toBe(true);
+    expect(cellEls[39].classList.contains('revealed')).toBe(true);
+    expect(cellEls[41].classList.contains('revealed')).toBe(true);
+    expect(cellEls[48].classList.contains('revealed')).toBe(true);
+    expect(cellEls[50].classList.contains('revealed')).toBe(true);
+  });
+
+  it('recovers from a corrupted best-times record instead of throwing', async () => {
+    ctx.storage.set('xpcomputer.winmine.best', JSON.stringify([1, 2, 3])); // corrupt: array, not a map
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    const win = openMinesweeper(ctx);
+    const cellEls = win.el.querySelectorAll('.ms-cell');
+
+    press(cellEls[0], 0, 1);
+    release(cellEls[0], 0);
+    vi.advanceTimersByTime(1000);
+
+    const mineIndices = new Set(Array.from({ length: 10 }, (_, k) => k + 1));
+    for (let i = 1; i < cellEls.length; i++) {
+      if (mineIndices.has(i) || cellEls[i].classList.contains('revealed')) continue;
+      press(cellEls[i], 0, 1);
+      release(cellEls[i], 0);
+    }
+
+    const dlg = ctx.wm.windows.find((w) => w.appId === 'dialog');
+    expect(dlg).toBeTruthy();
+    dlg.el.querySelector('.xp-msgbox-buttons button').click();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const best = JSON.parse(ctx.storage.get('xpcomputer.winmine.best'));
+    expect(best.beginner).toEqual({ time: 1, name: 'Anonymous' });
+  });
+
+  it('clears stale press state on restart so releasing over the rebuilt grid does not reveal a cell', () => {
+    const win = openMinesweeper(ctx);
+    const oldCell0 = win.el.querySelector('.ms-cell[data-i="0"]');
+    press(oldCell0, 0, 1); // press-and-hold, never released
+    expect(oldCell0.classList.contains('pressed')).toBe(true);
+
+    win.el.querySelector('.ms-face').click(); // restart mid-press (stand-in for F2 / menu New)
+
+    const newCell0 = win.el.querySelector('.ms-cell[data-i="0"]');
+    expect(newCell0).not.toBe(oldCell0); // newGame() rebuilt the grid from scratch
+    release(newCell0, 0); // release lands on the freshly built grid
+
+    expect(newCell0.classList.contains('revealed')).toBe(false);
+  });
 });
