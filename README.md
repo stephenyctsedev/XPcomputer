@@ -38,7 +38,40 @@ flag only affects the generated site content (`resume.json` / homepage).
 Pushing to `main` runs tests, builds, and deploys to GitHub Pages
 (`.github/workflows/deploy.yml`). Pages source must be set to "GitHub Actions".
 
+## Controls
+
+- Desktop: single click selects an icon, double click or Enter opens it; Alt+F4 closes the focused window; Escape closes dialogs.
+- Start > Run accepts `iexplore`, `explorer`, `notepad`, `winmine`, `sol`, `pinball`.
+- The tray speaker toggles sound (remembered between visits).
+- 3D room (Phase 2): click the PC to sit down, Escape or "Back to room" to stand up.
+
+## Manual QA checklist
+
+Run before every release, in Chrome and Firefox at minimum (Edge and Safari when available):
+
+- [ ] Boot plays and can be skipped by clicking; startup chime after the first click
+- [ ] Balloon tip appears once per boot and opens Internet Explorer
+- [ ] Homepage shows every resume section and no phone number
+- [ ] PDF opens in the Adobe Reader window; Save a Copy downloads it; fallback shows when PDFs cannot embed
+- [ ] Every desktop icon, Start menu item, All Programs entry and Run command does something sensible
+- [ ] Windows drag, resize, minimize, maximize, close; task buttons stay in sync
+- [ ] Explorer: drives, folders, Back/Forward/Up, Views, task pane links, right-click Properties
+- [ ] Notepad edit → close asks to save
+- [ ] Turn Off, Restart, Stand By, Log Off all recover to a working desktop
+- [ ] `?mode=flat` letterboxes at any window size; phone width shows the notice
+- [ ] Mute persists across reload
+
+## Roadmap
+
+1. Skeleton, resume pipeline, XP shell, IE/Explorer/Notepad (this plan) — done when the checklist passes
+2. three.js cyberpunk bedroom with the CSS3D screen
+3. Minesweeper
+4. Solitaire
+5. Pinball
+6. Polish and performance pass
+
 ## Licensing
 
 Code is MIT. Uses three.js (MIT) and XP.css (MIT). No Microsoft artwork,
-sounds, logos or card art are included; everything is drawn or synthesized here.
+sounds, logos or card art are included; every icon, wallpaper, boot screen and
+sound is drawn or synthesized in this repository.
