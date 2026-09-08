@@ -21,7 +21,7 @@ export function createCameraRig(camera, controls, { screenCenter, screenNormal, 
     tween?.cancel();
     controls.enabled = false;
     const from = { position: camera.position.clone(), target: controls.target.clone() };
-    tween = createTween({
+    const t = createTween({
       duration: reducedMotion ? 0 : duration,
       onUpdate: (k) => {
         camera.position.lerpVectors(from.position, to.position, k);
@@ -34,6 +34,11 @@ export function createCameraRig(camera, controls, { screenCenter, screenNormal, 
         setState(endState);
       },
     });
+    // createTween can finish synchronously (duration <= 0, e.g. reducedMotion),
+    // firing onComplete's `tween = null` before this assignment would otherwise
+    // run. Only keep the tween if it's still in flight, so a synchronous finish
+    // doesn't get overwritten back to a stale non-null done tween.
+    tween = t.done ? null : t;
   }
 
   return {

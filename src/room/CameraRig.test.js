@@ -60,6 +60,16 @@ describe('createCameraRig', () => {
     rig.onResize();
     expect(camera.position.z).toBeGreaterThan(before);
   });
+  it('keeps driving OrbitControls after a reduced-motion round trip', () => {
+    const { controls, rig } = setup({ reducedMotion: true });
+    rig.toScreen();
+    expect(rig.state).toBe('screen');
+    rig.toOverview();
+    expect(rig.state).toBe('overview');
+    const before = controls.updates;
+    rig.update(0.1);
+    expect(controls.updates).toBe(before + 1);
+  });
   it('ignores redundant requests and only drives controls in overview', () => {
     const { controls, rig } = setup();
     rig.update(0.1);
