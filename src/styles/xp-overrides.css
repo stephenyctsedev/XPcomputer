@@ -149,3 +149,36 @@
 .xp-sm-footer-btn:hover { background: rgba(255,255,255,.2); }
 .xp-sm-flyout { position: absolute; width: 190px; background: #fff; border: 1px solid #0f2f8a; box-shadow: 3px 3px 6px rgba(0,0,0,.4); padding: 2px; border-left: 3px solid #245edb; }
 .xp-sm-flyout .xp-sm-item { padding: 3px 6px; }
+
+/* ---- Boot / power ---- */
+.xp-boot { position: absolute; inset: 0; z-index: 200000; background: #000; color: #ccc; font-family: "Lucida Console", Consolas, monospace; cursor: default; }
+.xp-boot > * { position: absolute; inset: 0; }
+.xp-off { background: #000; display: grid; place-items: center; }
+.xp-off-hint { color: #2a2a2a; font: 13px Tahoma, sans-serif; letter-spacing: 1px; }
+.xp-bios { margin: 0; padding: 24px 28px; font-size: 15px; line-height: 1.5; color: #c8c8c8; white-space: pre-wrap; }
+.xp-bios::after { content: "_"; animation: xp-blink 1s steps(1) infinite; }
+@keyframes xp-blink { 50% { opacity: 0; } }
+.xp-bootlogo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 44px; background: #000; }
+.xp-bootlogo-brand { display: flex; align-items: center; gap: 18px; }
+.xp-bootlogo-text { font: 300 46px/1 "Trebuchet MS", "Franklin Gothic Medium", Tahoma, sans-serif; color: #fff; letter-spacing: -1px; }
+.xp-bootlogo-text b { font-weight: bold; color: #f0a028; font-size: 30px; vertical-align: top; margin-left: 2px; }
+.xp-flag { display: grid; grid-template-columns: 26px 26px; gap: 3px; transform: skewY(-10deg) rotate(-4deg); filter: drop-shadow(0 0 6px rgba(255,255,255,.35)); }
+.xp-flag i { display: block; width: 26px; height: 22px; border-radius: 3px; }
+.xp-flag i:nth-child(1) { background: #ff1493; } .xp-flag i:nth-child(2) { background: #00d9ff; }
+.xp-flag i:nth-child(3) { background: #b800ff; } .xp-flag i:nth-child(4) { background: #1eff00; }
+.xp-progress { width: 170px; height: 14px; border: 1px solid #8a8a8a; border-radius: 3px; overflow: hidden; position: relative; }
+.xp-progress i { position: absolute; top: 2px; bottom: 2px; width: 9px; background: linear-gradient(#5b8be8, #2a5cc8); border-radius: 1px; animation: xp-progress 2s linear infinite; }
+.xp-progress i:nth-child(2) { animation-delay: .13s; } .xp-progress i:nth-child(3) { animation-delay: .26s; }
+@keyframes xp-progress { from { left: -12px; } to { left: 172px; } }
+.xp-bootlogo-foot { position: absolute; bottom: 30px; left: 30px; font: 12px Tahoma, sans-serif; color: #888; }
+.xp-welcome, .xp-logon, .xp-shutdown { background: linear-gradient(#5a7edc, #3d64c9 45%, #2f56b8); color: #fff; font-family: Tahoma, sans-serif; }
+.xp-welcome { display: grid; place-items: center; }
+.xp-welcome-text { font: italic 46px/1 "Trebuchet MS", Tahoma, sans-serif; text-shadow: 2px 2px 3px rgba(0,0,0,.4); }
+.xp-logon { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; }
+.xp-logon-head { font-size: 16px; }
+.xp-logon-user { display: flex; align-items: center; gap: 14px; padding: 8px 24px 8px 8px; border: 1px solid rgba(255,255,255,.4); border-radius: 6px; background: rgba(255,255,255,.12); color: #fff; font: bold 16px Tahoma, sans-serif; box-shadow: none; min-width: 0; min-height: 0; cursor: default; }
+.xp-logon-user:hover { background: rgba(255,255,255,.28); }
+.xp-logon-avatar { display: grid; place-items: center; width: 48px; height: 48px; background: #fff; border-radius: 4px; }
+.xp-shutdown { display: grid; place-items: center; }
+.xp-shutdown-text { font-size: 18px; }
+@media (prefers-reduced-motion: reduce) { .xp-progress i, .xp-bios::after { animation: none; } }
