@@ -50,14 +50,27 @@ export async function mountRoom(app, screenEl, desktop, { reducedMotion = false 
 
   // Capture phase: runs before the shell's own Escape handlers. If a menu or dialog is open, Escape belongs to the shell.
   const shellBusy = () => screenEl.querySelector('.xp-startmenu:not([hidden]), .xp-menu, .xp-dialog') !== null;
-  window.addEventListener('keydown', (e) => {
+  const onKeydown = (e) => {
     if (e.key !== 'Escape' || room.state !== 'screen' || shellBusy()) return;
     e.preventDefault();
     room.leaveScreen();
-  }, true);
+  };
+  window.addEventListener('keydown', onKeydown, true);
 
-  desktop.on('booted', () => room.setPower(true));
-  desktop.on('shutdown', () => { room.setPower(false); room.leaveScreen(); });
+  const offBooted = desktop.on('booted', () => room.setPower(true));
+  const offShutdown = desktop.on('shutdown', () => { room.setPower(false); room.leaveScreen(); });
   room.setPower(desktop.isOn);
-  return room;
+
+  // room.dispose() only tears down what createRoom() itself registered. Wrap it so the
+  // mount-level keydown listener and desktop subscriptions above are released too.
+  return {
+    ...room,
+    get state() { return room.state; },
+    dispose() {
+      window.removeEventListener('keydown', onKeydown, true);
+      offBooted();
+      offShutdown();
+      room.dispose();
+    },
+  };
 }
