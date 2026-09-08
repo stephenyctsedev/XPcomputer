@@ -154,14 +154,15 @@ export function createDesktop(rootEl, { resume, pdfHref, repoUrl, storage = safe
   }
 
   desktopEl.addEventListener('pointerdown', (e) => { if (e.target === desktopEl || e.target.classList.contains('xp-icons-layer')) { icons.clear(); wm.blur(); } });
-  rootEl.addEventListener('keydown', (e) => { if (e.altKey && e.key === 'F4') { e.preventDefault(); wm.focused?.close(); } });
-  rootEl.addEventListener('pointerdown', () => sounds.unlock(), { once: true });
+  const rootListenerAbort = new AbortController();
+  rootEl.addEventListener('keydown', (e) => { if (e.altKey && e.key === 'F4') { e.preventDefault(); wm.focused?.close(); } }, { signal: rootListenerAbort.signal });
+  rootEl.addEventListener('pointerdown', () => sounds.unlock(), { once: true, signal: rootListenerAbort.signal });
   setInteractive(false);
 
   return {
     el: rootEl, ctx, powerOn, powerOff, setInteractive, on,
     get isOn() { return boot.state === 'on'; },
     get powerState() { return boot.state; },
-    destroy() { taskbar.destroy(); wm.closeAll(); rootEl.innerHTML = ''; },
+    destroy() { rootListenerAbort.abort(); taskbar.destroy(); wm.closeAll(); rootEl.innerHTML = ''; },
   };
 }

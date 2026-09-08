@@ -42,6 +42,19 @@ describe('createDesktop', () => {
     expect(desktop.ctx.wm.windows).toHaveLength(0);
   });
 
+  it('removes root-level keydown/pointerdown listeners on destroy', () => {
+    const desktop = mount();
+    const unlockSpy = vi.spyOn(desktop.ctx.sounds, 'unlock');
+    desktop.destroy();
+
+    const keyEvent = new KeyboardEvent('keydown', { key: 'F4', altKey: true, bubbles: true, cancelable: true });
+    desktop.el.dispatchEvent(keyEvent);
+    expect(keyEvent.defaultPrevented).toBe(false);
+
+    desktop.el.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+    expect(unlockSpy).not.toHaveBeenCalled();
+  });
+
   it('toggles interactivity and the CRT overlay', () => {
     const desktop = mount();
     expect(desktop.el.classList.contains('xp-interactive')).toBe(false);
