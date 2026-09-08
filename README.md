@@ -43,7 +43,9 @@ Pushing to `main` runs tests, builds, and deploys to GitHub Pages
 - Desktop: single click selects an icon, double click or Enter opens it; Alt+F4 closes the focused window; Escape closes dialogs.
 - Start > Run accepts `iexplore`, `explorer`, `notepad`, `winmine`, `sol`, `pinball`.
 - The tray speaker toggles sound (remembered between visits).
-- 3D room (Phase 2): click the PC to sit down, Escape or "Back to room" to stand up.
+- 3D room: drag to orbit, wheel to zoom, click the PC to sit down at it, Escape or "Back to room" to stand up.
+- "Low FX" (bottom right) turns bloom off and caps resolution for slower machines; the choice is remembered.
+- Phones, tablets and browsers without WebGL2 skip the room and get the desktop full screen. Force a mode with `?mode=room` or `?mode=flat`.
 
 ## Manual QA checklist
 
@@ -60,12 +62,18 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 - [ ] Turn Off, Restart, Stand By, Log Off all recover to a working desktop
 - [ ] `?mode=flat` letterboxes at any window size; phone width shows the notice
 - [ ] Mute persists across reload
+- [ ] Room loads with neon bloom and no console errors; orbit limits hold
+- [ ] Click PC → screen fills the viewport, desktop crisp and interactive only after arrival
+- [ ] Escape leaves the screen unless a menu or dialog is open
+- [ ] Turn Off darkens the CRT glow and returns the camera; clicking the PC boots again
+- [ ] Resize while focused re-fits the screen; Low FX toggles and persists; hidden tab pauses rendering
+- [ ] Phone emulation and `?mode=flat` show the flat desktop
 - [ ] resume.json (homepage) and resume-main.pdf agree on jobs/skills — re-run `npm run sync-resume` if Resume's CI has published a newer PDF
 
 ## Roadmap
 
 1. Skeleton, resume pipeline, XP shell, IE/Explorer/Notepad (this plan) — done when the checklist passes
-2. three.js cyberpunk bedroom with the CSS3D screen
+2. ~~three.js cyberpunk bedroom with the CSS3D screen~~ done
 3. Minesweeper
 4. Solitaire
 5. Pinball
