@@ -25,9 +25,9 @@ export function registerMisc(registry) {
       return ctx.wm.open({ appId: 'help', title: 'Help and Support Center', icon: 'help', width: 520, height: 400, content: body });
     },
   });
-  for (const [id, name] of [['winmine', 'Minesweeper'], ['sol', 'Solitaire'], ['pinball', 'Pinball']]) {
+  for (const [id, name] of [['sol', 'Solitaire'], ['pinball', 'Pinball']]) {
     registry.register(id, {
-      name, icon: { winmine: 'mine', sol: 'cards', pinball: 'pinball' }[id],
+      name, icon: { sol: 'cards', pinball: 'pinball' }[id],
       launch: (ctx) => ctx.dialogs.message({ title: name, kind: 'info', text: `${name} installs in a later update. Check back soon!` }),
     });
   }

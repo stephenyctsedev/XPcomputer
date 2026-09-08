@@ -109,4 +109,19 @@ describe('createWindowManager', () => {
     d.setTitle('Warning');
     expect(d.el.querySelector('.title-bar-text').textContent).toContain('Warning');
   });
+
+  it('resizes programmatically, honours minimums and ignores maximized windows', () => {
+    const a = wm.open({ appId: 'a', title: 'A', x: 900, y: 700, minWidth: 120, minHeight: 100 });
+    const resized = [];
+    wm.on('resize', (w) => resized.push(w.title));
+    a.resize(300, 200);
+    expect(a.bounds).toMatchObject({ w: 300, h: 200 });
+    expect(a.bounds.x).toBeLessThanOrEqual(984);
+    a.resize(10, 10);
+    expect(a.bounds).toMatchObject({ w: 120, h: 100 });
+    a.maximize();
+    a.resize(100, 100);
+    expect(a.bounds.w).toBe(1024);
+    expect(resized).toEqual(['A', 'A']);
+  });
 });

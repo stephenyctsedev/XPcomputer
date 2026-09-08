@@ -152,6 +152,14 @@ export function createWindowManager(layerEl, { deskW = DESKTOP_WIDTH, deskH = DE
         emit('close', win);
       },
       setTitle(text) { win.title = text; titleText.data = text; emit('title', win); },
+      resize(w, h) {
+        if (win.isMaximized) return;
+        const nw = Math.max(minWidth, w);
+        const nh = Math.max(minHeight, h);
+        const c = clampPosition(win.bounds.x, win.bounds.y, nw, nh, deskW, deskH);
+        applyBounds(win, { x: c.x, y: c.y, w: nw, h: nh });
+        emit('resize', win);
+      },
     };
 
     const titleBar = el.querySelector('.title-bar');

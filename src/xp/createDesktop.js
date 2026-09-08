@@ -16,6 +16,7 @@ import { registerExplorer } from './apps/Explorer.js';
 import { registerNotepad } from './apps/Notepad.js';
 import { registerSystemProperties } from './apps/SystemProperties.js';
 import { registerMisc } from './apps/misc.js';
+import { registerMinesweeper } from './games/minesweeper/Minesweeper.js';
 import { buildFileSystem, PATHS } from '../data/filesystem.js';
 
 const RUNNABLE = ['iexplore', 'winmine', 'sol', 'pinball', 'notepad', 'explorer', 'sysprops', 'help', 'controlpanel'];
@@ -64,6 +65,7 @@ export function createDesktop(rootEl, { resume, pdfHref, repoUrl, storage = safe
   registerNotepad(registry);
   registerSystemProperties(registry);
   registerMisc(registry);
+  registerMinesweeper(registry);
   const launch = (id, payload) => () => registry.launch(id, payload);
 
   const icons = createDesktopIcons(rootEl.querySelector('.xp-icons-layer'), [
