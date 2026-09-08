@@ -31,7 +31,13 @@ export function buildComputer(parent, { screenElement, position = new THREE.Vect
     new THREE.MeshStandardMaterial({ color: 0x000000, emissive: new THREE.Color(0x3fbf3f), emissiveIntensity: 0 }), 0.5, 0.1, 0.161, 'powerLed');
   add(new THREE.BoxGeometry(0.42, 0.02, 0.14), dark, 0, 0.01, 0.3, 'keyboard');
   add(new THREE.BoxGeometry(0.06, 0.03, 0.1), dark, 0.32, 0.015, 0.3, 'mouse');
-  const hitbox = add(new THREE.BoxGeometry(0.9, 0.5, 0.5), new THREE.MeshBasicMaterial({ visible: false }), 0.2, 0.25, 0.05, 'pcHitbox');
+
+  // Cosmetic cables — thin dark meshes only, no effect on hitbox/placement math.
+  add(new THREE.CylinderGeometry(0.012, 0.012, 0.32, 8), dark, 0.48, -0.14, 0.12, 'cableA'); // power cable: tower front-left down toward the floor
+  add(new THREE.BoxGeometry(0.24, 0.008, 0.02), dark, 0.34, 0.012, 0.24, 'cableB'); // keyboard toward tower
+  add(new THREE.BoxGeometry(0.16, 0.006, 0.02), dark, 0.42, 0.01, 0.29, 'cableC'); // mouse toward tower
+
+  const hitbox = add(new THREE.BoxGeometry(0.9, 0.5, 0.64), new THREE.MeshBasicMaterial({ visible: false }), 0.2, 0.25, 0.05, 'pcHitbox');
 
   const cssObject = new CSS3DObject(screenElement);
   cssObject.position.set(0, 0.21, 0.1815);
