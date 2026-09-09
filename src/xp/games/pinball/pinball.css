@@ -1,0 +1,15 @@
+.pb { display: flex; flex-direction: column; flex: 1; min-height: 0; background: #0b0714; color: #cfe6ff; outline: none; }
+.pb-main { flex: 1; display: flex; min-height: 0; }
+.pb-table { flex: 1; min-width: 0; display: grid; place-items: center; background: #05030c; overflow: hidden; }
+.pb-table canvas { display: block; box-shadow: 0 0 24px rgba(62,233,255,.25); }
+.pb-panel { width: 220px; flex: none; padding: 14px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(#150b2a, #0b0714); border-left: 1px solid rgba(62,233,255,.3); font: 12px Tahoma, Verdana, sans-serif; }
+.pb-panel h2 { margin: 0; font: bold 22px "Trebuchet MS", Tahoma, sans-serif; color: #ff2bd6; text-shadow: 0 0 12px rgba(255,43,214,.7); letter-spacing: 1px; }
+.pb-stat { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 8px; border: 1px solid rgba(62,233,255,.3); border-radius: 4px; background: rgba(0,0,0,.35); }
+.pb-stat b { color: #fff; font-variant-numeric: tabular-nums; }
+.pb-score b { font-size: 20px; color: #3ee9ff; text-shadow: 0 0 10px rgba(62,233,255,.6); }
+.pb-letters { display: flex; justify-content: space-between; }
+.pb-letter { width: 24px; height: 24px; display: grid; place-items: center; border: 1px solid rgba(255,214,0,.35); border-radius: 3px; color: rgba(255,255,255,.35); font-weight: bold; }
+.pb-letter.lit { background: rgba(255,214,0,.85); color: #000; box-shadow: 0 0 10px rgba(255,214,0,.8); }
+.pb-mission { min-height: 34px; color: #ffd6f6; line-height: 1.4; }
+.pb-keys { margin-top: auto; color: rgba(207,230,255,.75); line-height: 1.8; }
+.pb-keys kbd { display: inline-block; min-width: 18px; padding: 0 4px; border: 1px solid rgba(255,255,255,.35); border-radius: 3px; font: 11px monospace; color: #fff; text-align: center; }
