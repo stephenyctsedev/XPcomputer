@@ -128,12 +128,19 @@ describe('explorer thumbnails', () => {
     expect(details).toContain('Unity, C#');
   });
 
-  it('replaces the details group with the file when one is selected', () => {
+  it('adds the selected file next to the project details, without replacing them', () => {
     const win = openExplorer(ctx, PROJECT);
     win.el.querySelector('[data-name="img2.jpg"]').click();
     const details = win.el.querySelector('.xp-taskpane').textContent;
+    expect(details).toContain('Dior Lip Glow Face Detection');
+    expect(details).toContain('Gesture-controlled mini-game.');
     expect(details).toContain('img2.jpg');
     expect(details).toContain('1600 x 900');
+  });
+
+  it('shows no selected-item group until a file is picked', () => {
+    const win = openExplorer(ctx, PROJECT);
+    expect([...win.el.querySelectorAll('.xp-taskpane-title')].map((t) => t.textContent)).not.toContain('Selected Item');
   });
 
   it('offers a slide show link that launches the viewer at the first item', () => {
