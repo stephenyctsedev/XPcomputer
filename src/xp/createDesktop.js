@@ -18,6 +18,7 @@ import { registerSystemProperties } from './apps/SystemProperties.js';
 import { registerMisc } from './apps/misc.js';
 import { registerPictureViewer } from './apps/PictureViewer.js';
 import { registerMinesweeper } from './games/minesweeper/Minesweeper.js';
+import { registerSolitaire } from './games/solitaire/Solitaire.js';
 import { buildFileSystem, PATHS } from '../data/filesystem.js';
 
 const RUNNABLE = ['iexplore', 'winmine', 'sol', 'pinball', 'notepad', 'explorer', 'sysprops', 'help', 'controlpanel'];
@@ -57,7 +58,7 @@ export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = 
     const s = rect.width / DESKTOP_WIDTH || 1;
     return { x: (clientX - rect.left) / s, y: (clientY - rect.top) / s };
   };
-  const ctx = { wm, dialogs, menus, sounds, resume, portfolio, fs, pdfHref, mediaBase, repoUrl, storage, openExternal, screenEl: rootEl, toDesktopPoint };
+  const ctx = { wm, dialogs, menus, sounds, resume, portfolio, fs, pdfHref, mediaBase, repoUrl, storage, openExternal, screenEl: rootEl, toDesktopPoint, reducedMotion };
   const registry = createRegistry(ctx);
   ctx.registry = registry;
   registerInternetExplorer(registry);
@@ -68,6 +69,7 @@ export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = 
   registerMisc(registry);
   registerPictureViewer(registry);
   registerMinesweeper(registry);
+  registerSolitaire(registry);
   const launch = (id, payload) => () => registry.launch(id, payload);
 
   const icons = createDesktopIcons(rootEl.querySelector('.xp-icons-layer'), [

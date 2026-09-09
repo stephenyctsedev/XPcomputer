@@ -1,0 +1,18 @@
+.sol { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.sol-table { position: relative; flex: 1; min-height: 0; background: #008000; overflow: hidden; outline: none; user-select: none; -webkit-user-select: none; touch-action: none; }
+.sol-zone { position: absolute; width: 71px; height: 96px; border-radius: 5px; box-sizing: border-box; }
+.sol-stock, .sol-waste, .sol-foundation { border: 1px solid rgba(0,0,0,.35); box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); }
+.sol-stock.empty::after { content: "○"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 40px; color: rgba(0,0,0,.35); }
+.sol-col { height: auto; bottom: 0; min-height: 96px; }
+.sol-card { position: absolute; left: 0; width: 71px; height: 96px; }
+.sol-card svg { display: block; width: 71px; height: 96px; border-radius: 5px; box-shadow: 1px 1px 2px rgba(0,0,0,.4); }
+.sol-card.face-up { cursor: grab; }
+.sol-drag { position: absolute; z-index: 50; pointer-events: none; width: 71px; }
+.sol-win { position: absolute; inset: 0; z-index: 60; }
+.sol-status { margin: 0; }
+.sol-status .status-bar-field { min-width: 120px; }
+.sol-options fieldset { margin-bottom: 8px; }
+.sol-deck-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; justify-items: center; }
+.sol-deck-choice { padding: 3px; border: 2px solid transparent; background: none; box-shadow: none; min-width: 0; min-height: 0; border-radius: 3px; }
+.sol-deck-choice svg { width: 53px; height: 72px; display: block; }
+.sol-deck-choice.selected { border-color: #316ac5; background: #d6e3f7; }
