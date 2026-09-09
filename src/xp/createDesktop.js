@@ -18,10 +18,11 @@ import { registerSystemProperties } from './apps/SystemProperties.js';
 import { registerMisc } from './apps/misc.js';
 import { registerDisplayProperties, applyWallpaper } from './apps/DisplayProperties.js';
 import { registerPictureViewer } from './apps/PictureViewer.js';
+import { registerTaskManager } from './apps/TaskManager.js';
 import { registerGames } from './games/index.js';
 import { buildFileSystem, PATHS } from '../data/filesystem.js';
 
-const RUNNABLE = ['iexplore', 'winmine', 'sol', 'pinball', 'notepad', 'explorer', 'sysprops', 'help', 'controlpanel'];
+const RUNNABLE = ['iexplore', 'winmine', 'sol', 'pinball', 'notepad', 'explorer', 'sysprops', 'help', 'controlpanel', 'taskmgr', 'display'];
 const NOT_WIN32 = ['cmd', 'calc', 'regedit', 'msconfig'];
 
 function defaultOpenExternal(url) {
@@ -69,6 +70,8 @@ export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = 
   registerMisc(registry);
   registerDisplayProperties(registry);
   registerPictureViewer(registry);
+  registerTaskManager(registry);
+  registry.register('run', { name: 'Run', icon: 'run', launch: () => dialogs.run({ onRun: runCommand }) });
   registerGames(registry);
   const launch = (id, payload) => () => registry.launch(id, payload);
 
@@ -175,6 +178,12 @@ export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = 
       { separator: true },
       { label: 'Properties', action: launch('display') },
     ]);
+  });
+  rootEl.querySelector('.xp-taskbar-root').addEventListener('contextmenu', (e) => {
+    if (e.target.closest('.xp-task, .xp-start')) return;
+    e.preventDefault();
+    const { x, y } = toDesktopPoint(e.clientX, e.clientY);
+    menus.openAt(x, y - 60, [{ label: 'Task Manager', action: launch('taskmgr') }, { separator: true }, { label: 'Properties', action: launch('display') }]);
   });
   const rootListenerAbort = new AbortController();
   rootEl.addEventListener('keydown', (e) => { if (e.altKey && e.key === 'F4') { e.preventDefault(); wm.focused?.close(); } }, { signal: rootListenerAbort.signal });

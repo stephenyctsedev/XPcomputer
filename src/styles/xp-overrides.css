@@ -219,3 +219,15 @@
 .xp-display-stand { display: block; width: 60px; height: 10px; margin: 0 auto; background: #bdb8ac; border-radius: 0 0 4px 4px; }
 .xp-display-note { color: #666; margin: 12px 0 0; }
 .xp-display-buttons { justify-content: flex-end; padding-top: 10px; }
+
+/* ---- Task Manager ---- */
+.xp-tm { display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 8px; font-size: 11px; }
+.xp-tm [role="tabpanel"] { flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 8px; }
+.xp-tm-list { flex: 1; overflow: auto; background: #fff; }
+.xp-tm table { width: 100%; border-collapse: collapse; }
+.xp-tm th { text-align: left; font-weight: normal; padding: 2px 6px; background: #ece9d8; border-right: 1px solid #aca899; border-bottom: 1px solid #aca899; position: sticky; top: 0; }
+.xp-tm td { padding: 2px 6px; white-space: nowrap; }
+.xp-tm tr.selected td { background: #316ac5; color: #fff; }
+.xp-tm-buttons { justify-content: flex-end; padding-top: 8px; }
+.xp-tm-perf { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.xp-tm-gauge { height: 70px; display: grid; place-items: center; background: #000; color: #0f0; font: bold 18px "Courier New", monospace; border: 1px solid #555; }
