@@ -30,7 +30,7 @@ describe('applyScore, time and bonus', () => {
   it('takes 2 points every 10 seconds and awards 700000/seconds after 30 s', () => {
     expect(TIME_PENALTY_STEP).toBe(-2);
     expect(winBonus(30)).toBe(0);
-    expect(winBonus(31)).toBe(Math.round(700000 / 31));
+    expect(winBonus(31)).toBe(22581);
     expect(winBonus(120)).toBe(5833);
   });
 });
