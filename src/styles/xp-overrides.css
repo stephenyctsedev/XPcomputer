@@ -84,6 +84,15 @@
 .xp-item.selected .xp-item-thumb { border-color: #0c327d; }
 .xp-item-header { border-bottom: 1px solid #d8d2bd; color: #444; pointer-events: none; }
 
+/* ---- Picture viewer ---- */
+.xp-viewer { display: flex; flex-direction: column; flex: 1; min-height: 0; background: #5a5a5a; }
+.xp-viewer-stage { flex: 1; display: flex; align-items: center; justify-content: center; overflow: auto; min-height: 0; padding: 6px; }
+.xp-viewer-stage img, .xp-viewer-stage video { max-width: none; }
+.xp-viewer-fit img, .xp-viewer-fit video { max-width: 100%; max-height: 100%; object-fit: contain; }
+.xp-viewer-broken { color: #fff; font-size: 11px; padding: 20px; text-align: center; }
+.xp-viewer-caption { background: #ece9d8; padding: 3px 8px; font-size: 11px; border-top: 1px solid #d8d2bd; }
+.xp-viewer-bar { background: #ece9d8; display: flex; align-items: center; gap: 4px; padding: 4px 6px; }
+
 /* ---- Notepad ---- */
 .xp-notepad { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .xp-notepad textarea { flex: 1; resize: none; border: 0; outline: 0; margin: 0; padding: 4px; font: 13px/1.35 "Lucida Console", Consolas, monospace; box-shadow: none; border-radius: 0; background: #fff; }

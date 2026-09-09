@@ -16,6 +16,7 @@ import { registerExplorer } from './apps/Explorer.js';
 import { registerNotepad } from './apps/Notepad.js';
 import { registerSystemProperties } from './apps/SystemProperties.js';
 import { registerMisc } from './apps/misc.js';
+import { registerPictureViewer } from './apps/PictureViewer.js';
 import { registerMinesweeper } from './games/minesweeper/Minesweeper.js';
 import { buildFileSystem, PATHS } from '../data/filesystem.js';
 
@@ -65,6 +66,7 @@ export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = 
   registerNotepad(registry);
   registerSystemProperties(registry);
   registerMisc(registry);
+  registerPictureViewer(registry);
   registerMinesweeper(registry);
   const launch = (id, payload) => () => registry.launch(id, payload);
 
