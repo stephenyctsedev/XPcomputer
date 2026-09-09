@@ -63,6 +63,7 @@ Pushing to `main` runs tests, builds, and deploys to GitHub Pages
 - Phones, tablets and browsers without WebGL2 skip the room and get the desktop full screen. Force a mode with `?mode=room` or `?mode=flat`.
 - Minesweeper: left click reveals, right click flags (then ?), middle click or Shift+click chords, F2 new game. Best times are stored in the browser.
 - Solitaire: drag runs, double-click sends a card to its foundation, click the stock to draw, F2 deals, Ctrl+Z undoes one move. Options and card back are remembered.
+- Pinball: Z and / flippers, hold Space to launch, X and . nudge (three quick nudges tilt), F2 new game, F3 pause. High score is stored in the browser.
 - Picture viewer: left and right arrows move between photos, Escape closes, and the button strip toggles best fit and actual size.
 
 ## Manual QA checklist
@@ -96,6 +97,7 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 - [ ] "View as a slide show" advances on its own and stops at the last photo; clicking Next cancels it
 - [ ] The MEGABOX video plays in the viewer and starts muted when the tray speaker is muted
 - [ ] The desktop My Pictures icon, the Start menu entry and the homepage Projects link all reach the folder
+- [ ] Pinball: launch, flippers, bumpers, targets/bank, letters/extra ball, tilt, three-ball game over with high score, pause on minimize
 
 ## Roadmap
 
@@ -104,7 +106,7 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 3. ~~Minesweeper~~ done
 4. ~~Portfolio import from GBC, replacing the Wix site~~ done
 5. ~~Solitaire~~ done
-6. Pinball
+6. ~~Pinball~~ done
 7. Polish and performance pass
 
 ## Licensing
