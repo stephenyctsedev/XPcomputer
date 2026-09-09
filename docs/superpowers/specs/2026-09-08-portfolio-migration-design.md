@@ -238,7 +238,8 @@ Four cheap touchpoints, because nine folders three levels deep is a poor front
 door.
 
 - The boot balloon tip mentions the portfolio as well as the resume.
-- The Start menu gains a `My Pictures` entry, which XP shipped anyway.
+- The Start menu already carries a `My Pictures` entry pointing at the right
+  path, so it only needs the new pictures icon in place of the generic folder.
 - The desktop gains a `My Pictures` shortcut beside Internet Explorer and My
   Documents, opening Explorer at that folder.
 - The homepage nav bar gains a `Projects` link.
