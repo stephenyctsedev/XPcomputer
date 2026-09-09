@@ -17,9 +17,7 @@ import { registerNotepad } from './apps/Notepad.js';
 import { registerSystemProperties } from './apps/SystemProperties.js';
 import { registerMisc } from './apps/misc.js';
 import { registerPictureViewer } from './apps/PictureViewer.js';
-import { registerMinesweeper } from './games/minesweeper/Minesweeper.js';
-import { registerSolitaire } from './games/solitaire/Solitaire.js';
-import { registerPinball } from './games/pinball/Pinball.js';
+import { registerGames } from './games/index.js';
 import { buildFileSystem, PATHS } from '../data/filesystem.js';
 
 const RUNNABLE = ['iexplore', 'winmine', 'sol', 'pinball', 'notepad', 'explorer', 'sysprops', 'help', 'controlpanel'];
@@ -69,9 +67,7 @@ export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = 
   registerSystemProperties(registry);
   registerMisc(registry);
   registerPictureViewer(registry);
-  registerMinesweeper(registry);
-  registerSolitaire(registry);
-  registerPinball(registry);
+  registerGames(registry);
   const launch = (id, payload) => () => registry.launch(id, payload);
 
   const icons = createDesktopIcons(rootEl.querySelector('.xp-icons-layer'), [
