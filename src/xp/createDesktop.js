@@ -74,6 +74,7 @@ export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = 
     { id: 'iexplore', label: 'Internet Explorer', icon: 'ie', launch: launch('iexplore') },
     { id: 'computer', label: 'My Computer', icon: 'computer', launch: launch('explorer', { path: PATHS.myComputer }) },
     { id: 'documents', label: 'My Documents', icon: 'documents', launch: launch('explorer', { path: PATHS.myDocuments }) },
+    { id: 'pictures', label: 'My Pictures', icon: 'pictures', launch: launch('explorer', { path: `${PATHS.myDocuments}\\My Pictures` }) },
     { id: 'recycle', label: 'Recycle Bin', icon: 'recycle', corner: true, launch: launch('explorer', { path: PATHS.recycleBin }) },
   ]);
 
@@ -114,7 +115,7 @@ export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = 
     ],
     right: [
       { label: 'My Documents', icon: 'documents', action: launch('explorer', { path: PATHS.myDocuments }) },
-      { label: 'My Pictures', icon: 'folder', action: launch('explorer', { path: `${PATHS.myDocuments}\\My Pictures` }) },
+      { label: 'My Pictures', icon: 'pictures', action: launch('explorer', { path: `${PATHS.myDocuments}\\My Pictures` }) },
       { label: 'My Computer', icon: 'computer', action: launch('explorer', { path: PATHS.myComputer }) },
       { separator: true },
       { label: 'Control Panel', icon: 'controlpanel', action: launch('controlpanel') },
@@ -142,7 +143,7 @@ export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = 
     emit('booted');
     if (!firstBoot) return;
     firstBoot = false;
-    setTimeout(() => taskbar.showBalloon({ title: 'Welcome!', text: 'Double-click Internet Explorer to view my resume.', onClick: launch('iexplore') }), 1200);
+    setTimeout(() => taskbar.showBalloon({ title: 'Welcome!', text: 'Open Internet Explorer for my resume, or My Pictures for my project screenshots.', onClick: launch('iexplore') }), 1200);
   }
   async function powerOn() {
     if (boot.state !== 'off') return;

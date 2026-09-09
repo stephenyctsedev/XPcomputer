@@ -1,4 +1,5 @@
 import homepageCss from './homepage.css?raw';
+import { PATHS } from '../../data/filesystem.js';
 
 const esc = (value) => String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -10,6 +11,8 @@ export function renderHomepage(resume, { pdfHref, repoUrl, visitors = 1337 } = {
   const counter = String(visitors).padStart(6, '0').split('').map((d) => `<span class="digit">${d}</span>`).join('');
   const pdfLink = (label) => `<a class="pdf" href="${esc(pdfHref)}" data-app="reader" target="_blank" rel="noopener">${label}</a>`;
   const external = (href, label) => `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(label)}</a>`;
+  const PICTURES = `${PATHS.myDocuments}\\My Pictures`;
+  const pictures = (label) => `<a href="#projects" data-app="explorer" data-path="${esc(PICTURES)}">${esc(label)}</a>`;
 
   return `<!doctype html>
 <html><head><meta charset="utf-8"><title>${esc(displayName)}'s Homepage</title><style>${homepageCss}</style></head>
@@ -21,7 +24,7 @@ export function renderHomepage(resume, { pdfHref, repoUrl, visitors = 1337 } = {
   <h2>${esc(title)} &middot; ${esc(contact.location)}</h2>
 </td></tr>
 <tr><td class="construction">&#9888; This site is under construction &#9888; Best viewed in Internet Explorer 6 at 1024&times;768</td></tr>
-<tr><td class="nav"><a href="#about">About Me</a> | <a href="#experience">Experience</a> | <a href="#expertise">Expertise</a> | <a href="#education">Education</a> | <a href="#contact">Contact</a> | ${pdfLink('Download my resume (PDF)')}</td></tr>
+<tr><td class="nav"><a href="#about">About Me</a> | <a href="#experience">Experience</a> | ${pictures('Projects')} | <a href="#expertise">Expertise</a> | <a href="#education">Education</a> | <a href="#contact">Contact</a> | ${pdfLink('Download my resume (PDF)')}</td></tr>
 <tr><td class="content">
   <h3 id="about">About Me</h3>
   <p>${esc(summary)}</p>
@@ -39,7 +42,7 @@ export function renderHomepage(resume, { pdfHref, repoUrl, visitors = 1337 } = {
   <ul class="links">
     <li>E-mail: <a href="mailto:${esc(contact.email)}">${esc(contact.email)}</a></li>
     <li>LinkedIn: ${external(contact.linkedin, contact.linkedin)}</li>
-    <li>Portfolio: ${external(contact.portfolio, contact.portfolio)}</li>
+    <li>Portfolio: ${pictures('My project screenshots')}</li>
     <li>${pdfLink('Download my resume (PDF)')}</li>
     <li>${external(repoUrl, "View this site's source on GitHub")}</li>
   </ul>

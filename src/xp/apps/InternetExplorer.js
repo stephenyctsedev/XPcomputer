@@ -73,11 +73,14 @@ export function openInternetExplorer(ctx) {
     doc.addEventListener('click', (e) => {
       const a = e.target.closest('a');
       if (!a) return;
+      // data-app links win regardless of href: the Projects/Portfolio links use a bare
+      // "#projects" href (no real target to jump to), which would otherwise hit the
+      // in-page-anchor early return below and navigate the iframe to the live app itself.
+      if (a.dataset.app) { e.preventDefault(); registry.launch(a.dataset.app, a.dataset.path ? { path: a.dataset.path } : undefined); return; }
       const href = a.getAttribute('href') ?? '';
       if (href.startsWith('#')) return;
       e.preventDefault();
-      if (a.dataset.app) registry.launch(a.dataset.app);
-      else openExternal(href);
+      openExternal(href);
     });
   });
   body.addEventListener('click', (e) => {

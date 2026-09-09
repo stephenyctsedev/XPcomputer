@@ -17,7 +17,6 @@ describe('renderHomepage', () => {
     for (const l of resume.languages) expect(html).toContain(`${l.name}: ${l.level}`);
     expect(html).toContain(`mailto:${resume.contact.email}`);
     expect(html).toContain(resume.contact.linkedin);
-    expect(html).toContain(resume.contact.portfolio);
     expect(html).toContain(`Last updated: ${resume.updated}`);
   });
   it('links the PDF through the reader app and the repo externally', () => {
@@ -34,5 +33,12 @@ describe('renderHomepage', () => {
   });
   it('escapes HTML in content', () => {
     expect(renderHomepage({ ...resume, displayName: '<b>x</b>' }, opts)).toContain('&lt;b&gt;x&lt;/b&gt;');
+  });
+  it('links Projects and Portfolio into My Pictures rather than off-site', () => {
+    const html = renderHomepage(resume, { pdfHref: '/x.pdf', repoUrl: 'https://example.com' });
+    expect(html).toContain('data-app="explorer"');
+    expect(html).toContain('data-path="C:\\Documents and Settings\\Stephen\\My Documents\\My Pictures"');
+    expect(html).toContain('>Projects<');
+    expect(html).not.toContain(resume.contact.portfolio);
   });
 });
