@@ -38,6 +38,11 @@ export function openDisplayProperties(ctx) {
   select.addEventListener('change', () => { choice = select.value; showPreview(); });
   const win = wm.open({ appId: 'display', title: 'Display Properties', icon: 'controlpanel', dialog: true, width: 400, height: 430, content });
   const apply = () => { storage.set(KEY, choice); applyWallpaper(desktopEl, choice, wallpaperUrl); };
+  content.querySelector('[role="tablist"]').addEventListener('click', (e) => {
+    const tab = e.target.closest('[role="tab"]');
+    if (!tab) return;
+    e.preventDefault();
+  });
   content.addEventListener('click', (e) => {
     const result = e.target.closest('[data-result]')?.dataset.result;
     if (result === 'OK') { apply(); win.close(); }

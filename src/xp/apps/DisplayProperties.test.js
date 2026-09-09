@@ -30,4 +30,11 @@ describe('Display Properties', () => {
     expect(desktopEl.style.background).toContain('gradient');
     expect(ctx.wm.windows).toHaveLength(0);
   });
+  it('prevents tab anchor clicks from navigating the browser', () => {
+    const win = openDisplayProperties(ctx);
+    const tabAnchor = win.el.querySelector('[role="tab"] a');
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+    tabAnchor.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+  });
 });
