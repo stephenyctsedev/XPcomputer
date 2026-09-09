@@ -100,13 +100,29 @@ export function openExplorer(ctx, startPath = PATHS.myComputer) {
       type.textContent = TYPE_NAMES[child.kind] ?? 'File';
       el.append(type);
     }
-    el.addEventListener('click', () => { items.querySelectorAll('.selected').forEach((s) => s.classList.remove('selected')); el.classList.add('selected'); });
+    el.addEventListener('click', () => {
+      items.querySelectorAll('.selected').forEach((s) => s.classList.remove('selected'));
+      el.classList.add('selected');
+      renderTaskPane(currentNode(), child);
+    });
     el.addEventListener('dblclick', () => openNode(child));
     el.addEventListener('keydown', (e) => { if (e.key === 'Enter') openNode(child); });
     return el;
   }
 
-  function renderTaskPane(node) {
+  function detailsLines(node, selected) {
+    if (selected?.mediaKind) {
+      const size = selected.width && selected.height ? `${selected.width} x ${selected.height}` : 'Video file';
+      return [`<b>${esc(selected.name)}</b><br>${esc(size)}`];
+    }
+    if (node.project) {
+      const p = node.project;
+      return [`<b>${esc(p.name)}</b>`, esc(p.tagline), esc(p.description), `<i>${esc(p.tech.join(', '))}</i>`];
+    }
+    return [`<b>${esc(node.name)}</b><br>${TYPE_NAMES[node.kind] ?? 'File'}`];
+  }
+
+  function renderTaskPane(node, selected = null) {
     const link = (label, action) => `<a href="#" data-action="${esc(action)}">${esc(label)}</a>`;
     const groups = [];
     if (node === fs.root) {
@@ -118,10 +134,12 @@ export function openExplorer(ctx, startPath = PATHS.myComputer) {
     } else {
       const parent = parentPath(node.path);
       const parentLabel = parent === PATHS.myComputer ? 'My Computer' : parent.split('\\').pop();
-      groups.push(['File and Folder Tasks', [link('Make a new folder', 'unavailable'), link('Publish this folder to the Web', 'unavailable'), link('Share this folder', 'unavailable')]]);
+      const tasks = [link('Make a new folder', 'unavailable'), link('Publish this folder to the Web', 'unavailable'), link('Share this folder', 'unavailable')];
+      if (node.project) tasks.unshift(link('View as a slide show', `slideshow:${node.project.slug}`));
+      groups.push(['File and Folder Tasks', tasks]);
       groups.push(['Other Places', [link(parentLabel, `nav:${parent}`), link('My Documents', `nav:${PATHS.myDocuments}`), link('My Computer', `nav:${PATHS.myComputer}`)]]);
     }
-    groups.push(['Details', [`<b>${esc(node.name)}</b><br>${TYPE_NAMES[node.kind] ?? 'File'}`]]);
+    groups.push(['Details', detailsLines(node, selected)]);
     taskpane.innerHTML = groups.map(([title, lines]) =>
       `<div class="xp-taskpane-group"><div class="xp-taskpane-title">${title}</div><div class="xp-taskpane-body">${lines.map((l) => `<div>${l}</div>`).join('')}</div></div>`).join('');
   }
@@ -163,6 +181,7 @@ export function openExplorer(ctx, startPath = PATHS.myComputer) {
     e.preventDefault();
     const action = a.dataset.action;
     if (action.startsWith('nav:')) navigate(action.slice(4));
+    else if (action.startsWith('slideshow:')) registry.launch('viewer', { slug: action.slice(10), index: 0, slideshow: true });
     else if (action === 'unavailable') notAvailable();
     else registry.launch(action);
   });

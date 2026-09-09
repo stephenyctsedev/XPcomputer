@@ -75,14 +75,15 @@ describe('explorer', () => {
 });
 
 describe('explorer thumbnails', () => {
-  let ctx;
+  let ctx, launched;
   beforeEach(() => {
     document.body.innerHTML = '<div id="screen"><div id="layer"></div></div>';
+    launched = [];
     ctx = {
       wm: createWindowManager(document.querySelector('#layer')),
       fs: buildFileSystem(resume, portfolio),
       mediaBase: '/XPcomputer/',
-      registry: { launch: () => {} },
+      registry: { launch: (id, p) => launched.push([id, p]) },
       dialogs: { message: () => Promise.resolve('OK') },
       menus: createMenus(document.querySelector('#screen')),
       toDesktopPoint: (x, y) => ({ x, y }),
@@ -116,5 +117,35 @@ describe('explorer thumbnails', () => {
     img.dispatchEvent(new Event('error'));
     expect(win.el.querySelector('[data-name="img1.jpg"] img.xp-item-thumb')).toBeNull();
     expect(win.el.querySelector('[data-name="img1.jpg"] .xp-ico')).not.toBeNull();
+  });
+
+  it('shows the project prose in the task pane details group', () => {
+    const win = openExplorer(ctx, PROJECT);
+    const details = win.el.querySelector('.xp-taskpane').textContent;
+    expect(details).toContain('Dior Lip Glow Face Detection');
+    expect(details).toContain('Gesture-controlled mini-game.');
+    expect(details).toContain('A Dior-branded mini-game.');
+    expect(details).toContain('Unity, C#');
+  });
+
+  it('replaces the details group with the file when one is selected', () => {
+    const win = openExplorer(ctx, PROJECT);
+    win.el.querySelector('[data-name="img2.jpg"]').click();
+    const details = win.el.querySelector('.xp-taskpane').textContent;
+    expect(details).toContain('img2.jpg');
+    expect(details).toContain('1600 x 900');
+  });
+
+  it('offers a slide show link that launches the viewer at the first item', () => {
+    const win = openExplorer(ctx, PROJECT);
+    const link = [...win.el.querySelectorAll('.xp-taskpane a')].find((a) => a.textContent === 'View as a slide show');
+    link.click();
+    expect(launched.at(-1)).toEqual(['viewer', { slug: 'dior-lip-glow', index: 0, slideshow: true }]);
+  });
+
+  it('offers no slide show link outside a project folder', () => {
+    const win = openExplorer(ctx, PICTURES);
+    const link = [...win.el.querySelectorAll('.xp-taskpane a')].find((a) => a.textContent === 'View as a slide show');
+    expect(link).toBeUndefined();
   });
 });
