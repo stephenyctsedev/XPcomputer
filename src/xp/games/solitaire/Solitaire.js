@@ -31,6 +31,8 @@ export function openSolitaire(ctx, { dealer = null, reducedMotion = false, rando
   let drag = null;
   let animation = null;
   let winToken = 0;
+  let lastClickId = null;
+  let lastClickTime = 0;
 
   const body = document.createElement('div');
   body.className = 'sol';
@@ -161,13 +163,28 @@ export function openSolitaire(ctx, { dealer = null, reducedMotion = false, rando
     if (!drag) return;
     document.removeEventListener('pointermove', onMove);
     document.removeEventListener('pointerup', onUp);
-    const { source } = drag;
+    const { source, startX, startY, cardId } = drag;
     drag = null;
     const dropZone = e.target?.closest?.('[data-drop]');
     let target = null;
     if (dropZone?.dataset.drop === 'tableau') target = { type: 'tableau', col: Number(dropZone.dataset.col) };
     else if (dropZone?.dataset.drop === 'foundation') target = { type: 'foundation', index: Number(dropZone.dataset.index) };
-    if (!target || !perform(() => game.moveStack(source, target))) render();
+    const succeeded = target && perform(() => game.moveStack(source, target));
+    if (!succeeded) render();
+    // Real pointerdown/pointerup double-clicks never reach `dblclick` here: preventDefault()
+    // on pointerdown (below) suppresses the browser's synthesized click/dblclick for this
+    // interaction chain. Detect the same gesture from raw pointer events instead.
+    if (succeeded) { lastClickId = null; return; }
+    const moved = Math.hypot(e.clientX - startX, e.clientY - startY) > 5;
+    if (moved) {
+      lastClickId = null;
+    } else if (lastClickId === cardId && Date.now() - lastClickTime < 500) {
+      lastClickId = null;
+      perform(() => game.autoToFoundation(source));
+    } else {
+      lastClickId = cardId;
+      lastClickTime = Date.now();
+    }
   }
   table.addEventListener('pointerdown', (e) => {
     table.focus({ preventScroll: true });
@@ -189,7 +206,7 @@ export function openSolitaire(ctx, { dealer = null, reducedMotion = false, rando
       layer.append(cardNode);
     });
     table.append(layer);
-    drag = { source, layer, offsetX: (e.clientX - rect.left) / s, offsetY: (e.clientY - rect.top) / s };
+    drag = { source, layer, offsetX: (e.clientX - rect.left) / s, offsetY: (e.clientY - rect.top) / s, startX: e.clientX, startY: e.clientY, cardId: el.dataset.id };
     positionDrag(e);
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', onUp);

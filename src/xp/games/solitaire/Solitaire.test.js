@@ -37,6 +37,18 @@ describe('Solitaire window', () => {
     expect(openSolitaire(ctx)).toBe(win);
   });
 
+  it('sends a card home on two real pointerdown/pointerup clicks, with no synthetic dblclick event', () => {
+    const win = open(() => fromState({ tableau: [['H1'], [], [], [], [], [], []] }));
+    const clickAce = () => {
+      const el = win.el.querySelector('.sol-card[data-id="H1"]');
+      pointer(el, 'pointerdown', { clientX: 10, clientY: 10 });
+      pointer(el, 'pointerup', { clientX: 10, clientY: 10 });
+    };
+    clickAce();
+    clickAce();
+    expect(win.el.querySelector('.sol-foundation .sol-card').dataset.id).toBe('H1');
+  });
+
   it('drags a run onto another column and undoes it with Ctrl+Z', () => {
     const win = open(() => fromState({ tableau: [['H12'], ['S13'], [], [], [], [], []] }));
     const queen = win.el.querySelector('.sol-card[data-id="H12"]');
