@@ -27,7 +27,7 @@ export function registerMisc(registry) {
   });
   for (const [id, name] of [['pinball', 'Pinball']]) {
     registry.register(id, {
-      name, icon: { sol: 'cards', pinball: 'pinball' }[id],
+      name, icon: 'pinball',
       launch: (ctx) => ctx.dialogs.message({ title: name, kind: 'info', text: `${name} installs in a later update. Check back soon!` }),
     });
   }

@@ -10,6 +10,11 @@ describe('Solitaire window', () => {
   let ctx, played, mem;
   beforeEach(() => {
     document.body.innerHTML = '<div id="screen"><div id="layer"></div></div>';
+    // jsdom does not implement elementFromPoint at all (not even a stub returning null), so
+    // onUp's real-drop-target lookup would throw on every pointerup unless something defines
+    // it. Default to "nothing under the pointer"; tests that drop onto a real zone stub this
+    // to return that zone, matching what a mouse (no pointer capture) would actually report.
+    document.elementFromPoint = () => null;
     played = [];
     mem = new Map();
     ctx = {
@@ -55,7 +60,9 @@ describe('Solitaire window', () => {
     pointer(queen, 'pointerdown', { clientX: 20, clientY: 20 });
     expect(win.el.querySelector('.sol-drag')).not.toBeNull();
     document.dispatchEvent(new MouseEvent('pointermove', { bubbles: true, clientX: 120, clientY: 30 }));
-    pointer(win.el.querySelector('.sol-col[data-col="1"]'), 'pointerup', { clientX: 120, clientY: 30 });
+    const col1 = win.el.querySelector('.sol-col[data-col="1"]');
+    document.elementFromPoint = () => col1; // what a real mouse (no capture) would report here
+    pointer(col1, 'pointerup', { clientX: 120, clientY: 30 });
     expect(win.el.querySelectorAll('.sol-col[data-col="1"] .sol-card')).toHaveLength(2);
     expect(win.el.querySelector('.sol-drag')).toBeNull();
     win.el.querySelector('.sol-table').dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }));
@@ -66,7 +73,9 @@ describe('Solitaire window', () => {
   it('drops an invalid move back where it came from', () => {
     const win = open(() => fromState({ tableau: [['H12'], ['H13'], [], [], [], [], []] }));
     pointer(win.el.querySelector('.sol-card[data-id="H12"]'), 'pointerdown', { clientX: 5, clientY: 5 });
-    pointer(win.el.querySelector('.sol-col[data-col="1"]'), 'pointerup');
+    const col1 = win.el.querySelector('.sol-col[data-col="1"]');
+    document.elementFromPoint = () => col1;
+    pointer(col1, 'pointerup');
     expect(win.el.querySelectorAll('.sol-col[data-col="0"] .sol-card')).toHaveLength(1);
     expect(win.el.querySelectorAll('.sol-col[data-col="1"] .sol-card')).toHaveLength(1);
   });
@@ -109,5 +118,21 @@ describe('Solitaire window', () => {
     expect(JSON.parse(mem.get('xpcomputer.sol.options')).draw).toBe(3);
     win.el.querySelector('.sol-stock').click();
     expect(win.el.querySelectorAll('.sol-waste .sol-card')).toHaveLength(3);
+  });
+
+  it('ignores a double-click on a covered fanned waste card in draw-three (only the true top card is a valid target)', () => {
+    mem.set('xpcomputer.sol.options', JSON.stringify({ draw: 3 }));
+    // C1 is the bottom (most-covered) of the three fanned waste cards and is itself eligible
+    // for a foundation (an Ace), so this proves the click is rejected because it isn't the top
+    // card -- not merely because the clicked card had nowhere legal to go. H1, the real top
+    // card, is also an eligible Ace: under the old bug (no top-card guard on dblclick) it would
+    // be the one that moves, which is exactly the wrong-card failure this guards against.
+    const win = open(() => fromState({ draw: 3, waste: ['C1', 'D9', 'H1'] }));
+    expect(win.el.querySelectorAll('.sol-waste .sol-card')).toHaveLength(3);
+    const covered = win.el.querySelector('.sol-waste .sol-card[data-id="C1"]');
+    covered.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    expect(win.el.querySelectorAll('.sol-foundation .sol-card')).toHaveLength(0);
+    expect(win.el.querySelectorAll('.sol-waste .sol-card')).toHaveLength(3);
+    expect(win.el.querySelector('.sol-waste .sol-card[data-id="H1"]')).not.toBeNull();
   });
 });

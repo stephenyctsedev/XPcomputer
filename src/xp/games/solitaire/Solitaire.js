@@ -42,11 +42,16 @@ export function openSolitaire(ctx, { dealer = null, reducedMotion = false, rando
   const timeEl = body.querySelector('.sol-time');
   const win = wm.open({
     appId: 'sol', title: 'Solitaire', icon: 'cards', width: 640, height: 480, minWidth: 560, minHeight: 400, content: body,
-    onClose: () => { stopTimer(); winToken++; animation?.stop(); observer?.disconnect(); document.removeEventListener('pointermove', onMove); document.removeEventListener('pointerup', onUp); },
+    onClose: () => { stopTimer(); winToken++; animation?.stop(); observer?.disconnect(); document.removeEventListener('pointermove', onMove); document.removeEventListener('pointerup', onUp); document.removeEventListener('pointercancel', onCancel); document.removeEventListener('keydown', onDocumentKeyDown); },
   });
 
   function loadOptions() {
-    try { return { ...DEFAULTS, ...JSON.parse(storage.get(OPTIONS_KEY) ?? '{}') }; } catch { return { ...DEFAULTS }; }
+    let merged;
+    try { merged = { ...DEFAULTS, ...JSON.parse(storage.get(OPTIONS_KEY) ?? '{}') }; } catch { merged = { ...DEFAULTS }; }
+    const back = Number(merged.back);
+    merged.back = Number.isInteger(back) ? back : DEFAULTS.back;
+    merged.draw = merged.draw === 3 ? 3 : 1;
+    return merged;
   }
   const saveOptions = () => storage.set(OPTIONS_KEY, JSON.stringify(options));
   const colStep = () => Math.max(CARD_W + 6, Math.floor((table.clientWidth - MARGIN * 2 - CARD_W) / 6) || 0);
@@ -116,6 +121,7 @@ export function openSolitaire(ctx, { dealer = null, reducedMotion = false, rando
     score = 0;
     scoreBeforeMove = 0;
     seconds = 0;
+    lastClickId = null;
     render();
   }
   /** Run an engine action; on success apply score, sound, render, and handle the win. */
@@ -163,9 +169,15 @@ export function openSolitaire(ctx, { dealer = null, reducedMotion = false, rando
     if (!drag) return;
     document.removeEventListener('pointermove', onMove);
     document.removeEventListener('pointerup', onUp);
+    document.removeEventListener('pointercancel', onCancel);
     const { source, startX, startY, cardId } = drag;
     drag = null;
-    const dropZone = e.target?.closest?.('[data-drop]');
+    // Touch/pen pointers get implicit capture: e.target stays locked to the original
+    // pointerdown target (the card, now inside .sol-drag) for every subsequent event, never
+    // the element actually under the finger. elementFromPoint reflects the real drop target
+    // for touch and agrees with e.target for mouse (which has no capture). .sol-drag has
+    // pointer-events: none, so this correctly sees through it to the zone underneath.
+    const dropZone = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-drop]');
     let target = null;
     if (dropZone?.dataset.drop === 'tableau') target = { type: 'tableau', col: Number(dropZone.dataset.col) };
     else if (dropZone?.dataset.drop === 'foundation') target = { type: 'foundation', index: Number(dropZone.dataset.index) };
@@ -185,6 +197,17 @@ export function openSolitaire(ctx, { dealer = null, reducedMotion = false, rando
       lastClickId = cardId;
       lastClickTime = Date.now();
     }
+  }
+  function onCancel() {
+    // The browser took the gesture away (e.g. for a native scroll) — there is no reliable
+    // drop intent here, so just abort back to the last-known-good game state.
+    if (!drag) return;
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    document.removeEventListener('pointercancel', onCancel);
+    drag = null;
+    lastClickId = null;
+    render();
   }
   table.addEventListener('pointerdown', (e) => {
     table.focus({ preventScroll: true });
@@ -210,18 +233,29 @@ export function openSolitaire(ctx, { dealer = null, reducedMotion = false, rando
     positionDrag(e);
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onCancel);
   });
   table.addEventListener('click', (e) => { if (e.target.closest('.sol-stock')) perform(() => game.drawFromStock()); });
   table.addEventListener('dblclick', (e) => {
     const el = e.target.closest('.sol-card');
     if (!el || !game || game.state !== 'playing') return;
     const source = locate(el);
-    if (source && source.type !== 'stock') perform(() => game.autoToFoundation(source));
+    if (!source || source.type === 'stock') return;
+    // Same top-card guard as pointerdown: for a waste/foundation source, only the actual top
+    // card is a legitimate target. Without this, double-clicking a partially-covered fanned
+    // waste card (draw-three) acts on the real top card instead of the one under the pointer.
+    if (source.type !== 'tableau' && game.peek(source)[0]?.id !== el.dataset.id) return;
+    perform(() => game.autoToFoundation(source));
   });
-  table.addEventListener('keydown', (e) => {
+  // Bound to `document` (not `table`) and gated on window focus, like Minesweeper's F2 handler:
+  // `table` only gets DOM focus via a click inside it, so a table-scoped listener is dead right
+  // after the window opens and after any dialog closes (focus falls back to <body>).
+  function onDocumentKeyDown(e) {
+    if (!win.isFocused) return;
     if (e.key === 'F2') { e.preventDefault(); deal(); }
     if (e.ctrlKey && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); }
-  });
+  }
+  document.addEventListener('keydown', onDocumentKeyDown);
   const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(() => { if (game) render(); }) : null;
   observer?.observe(table);
 
