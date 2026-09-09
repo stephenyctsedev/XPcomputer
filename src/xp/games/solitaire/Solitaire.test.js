@@ -69,6 +69,24 @@ describe('Solitaire window', () => {
     expect(played).toContain('win');
   });
 
+  it('ignores a stale win dialog if the player deals again before answering it', async () => {
+    let resolveDialog;
+    ctx.dialogs.message = vi.fn(() => new Promise((resolve) => { resolveDialog = resolve; }));
+    const dealer = vi.fn(() => fromState({ waste: ['C13'], foundations: [full('S'), full('H'), full('D'), full('C').slice(0, 12)] }));
+    const win = open(dealer);
+    win.el.querySelector('.sol-waste .sol-card').dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(ctx.dialogs.message).toHaveBeenCalledTimes(1);
+    expect(dealer).toHaveBeenCalledTimes(1);
+    win.el.querySelector('.sol-table').dispatchEvent(new KeyboardEvent('keydown', { key: 'F2', bubbles: true }));
+    expect(dealer).toHaveBeenCalledTimes(2);
+    resolveDialog('Yes');
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(dealer).toHaveBeenCalledTimes(2); // the stale "Yes" must not trigger a third, unrequested deal
+  });
+
   it('saves options and redeals with draw three', () => {
     const win = open(() => fromState({ stock: ['S1', 'S2', 'S3', 'S4'] }));
     win.el.querySelector('.xp-menubar-item').click();

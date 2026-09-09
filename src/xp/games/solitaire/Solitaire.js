@@ -30,6 +30,7 @@ export function openSolitaire(ctx, { dealer = null, reducedMotion = false, rando
   let timer = null;
   let drag = null;
   let animation = null;
+  let winToken = 0;
 
   const body = document.createElement('div');
   body.className = 'sol';
@@ -39,7 +40,7 @@ export function openSolitaire(ctx, { dealer = null, reducedMotion = false, rando
   const timeEl = body.querySelector('.sol-time');
   const win = wm.open({
     appId: 'sol', title: 'Solitaire', icon: 'cards', width: 640, height: 480, minWidth: 560, minHeight: 400, content: body,
-    onClose: () => { stopTimer(); animation?.stop(); observer?.disconnect(); document.removeEventListener('pointermove', onMove); document.removeEventListener('pointerup', onUp); },
+    onClose: () => { stopTimer(); winToken++; animation?.stop(); observer?.disconnect(); document.removeEventListener('pointermove', onMove); document.removeEventListener('pointerup', onUp); },
   });
 
   function loadOptions() {
@@ -104,6 +105,7 @@ export function openSolitaire(ctx, { dealer = null, reducedMotion = false, rando
     }, 1000);
   }
   function deal() {
+    winToken++;
     stopTimer();
     animation?.stop();
     animation = null;
@@ -132,6 +134,7 @@ export function openSolitaire(ctx, { dealer = null, reducedMotion = false, rando
     if (game.undo()) { score = scoreBeforeMove; render(); }
   }
   async function onWin() {
+    const token = ++winToken;
     stopTimer();
     if (options.scoring === 'standard') { score = applyScore(score, winBonus(seconds)); renderStatus(); }
     sounds.play('win');
@@ -139,8 +142,10 @@ export function openSolitaire(ctx, { dealer = null, reducedMotion = false, rando
       animation = playWinAnimation(table, game.foundations, { random });
       await animation.finished;
       animation = null;
+      if (token !== winToken) return;
     }
     const again = await dialogs.message({ title: 'Solitaire', kind: 'question', owner: win, buttons: ['Yes', 'No'], text: `You won!\nScore: ${score}   Time: ${seconds}\n\nDeal again?` });
+    if (token !== winToken) return;
     if (again === 'Yes') deal();
   }
 
