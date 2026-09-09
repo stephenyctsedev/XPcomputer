@@ -25,10 +25,4 @@ export function registerMisc(registry) {
       return ctx.wm.open({ appId: 'help', title: 'Help and Support Center', icon: 'help', width: 520, height: 400, content: body });
     },
   });
-  for (const [id, name] of [['pinball', 'Pinball']]) {
-    registry.register(id, {
-      name, icon: 'pinball',
-      launch: (ctx) => ctx.dialogs.message({ title: name, kind: 'info', text: `${name} installs in a later update. Check back soon!` }),
-    });
-  }
 }
