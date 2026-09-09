@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import * as THREE from 'three';
 import { createCameraRig, OVERVIEW } from './CameraRig.js';
 
@@ -69,6 +69,18 @@ describe('createCameraRig', () => {
     const before = controls.updates;
     rig.update(0.1);
     expect(controls.updates).toBe(before + 1);
+  });
+  it('reaches the screen pose on its own if update() stops being called', () => {
+    vi.useFakeTimers();
+    const { rig, states } = setup();
+    rig.toScreen();
+    expect(rig.state).toBe('toScreen');
+    // No rig.update() calls from here on -- simulates the room's requestAnimationFrame
+    // loop stalling mid-flight, which would otherwise leave the screen un-clickable forever.
+    vi.advanceTimersByTime(2000);
+    expect(rig.state).toBe('screen');
+    expect(states).toEqual(['toScreen', 'screen']);
+    vi.useRealTimers();
   });
   it('ignores redundant requests and only drives controls in overview', () => {
     const { controls, rig } = setup();

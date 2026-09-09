@@ -117,6 +117,7 @@ export function createRoom(container, screenElement, { reducedMotion = false, lo
       window.removeEventListener('resize', resize);
       document.removeEventListener('visibilitychange', onVisibility);
       interaction.dispose();
+      rig.dispose();
       controls.dispose();
       effects.dispose();
       disposeSceneResources(scene);
