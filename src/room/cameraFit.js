@@ -8,3 +8,8 @@ export function fitDistance({ width, height, fovDeg, aspect, margin = 1.04 }) {
   const byWidth = (width / 2) / (tanHalf * aspect);
   return Math.max(byHeight, byWidth) * margin;
 }
+
+/** Uniform scale that fits contentWidth x contentHeight entirely inside boxWidth x boxHeight ("contain" fit). */
+export function containScale({ boxWidth, boxHeight, contentWidth, contentHeight }) {
+  return Math.min(boxWidth / contentWidth, boxHeight / contentHeight);
+}
