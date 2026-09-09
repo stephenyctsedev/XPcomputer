@@ -24,6 +24,7 @@ export function openPinball(ctx, { autoLoop = true } = {}) {
   let last = 0;
   let accumulator = 0;
   let gameOverShown = false;
+  let offMinimize = null;
 
   const body = document.createElement('div');
   body.className = 'pb';
@@ -50,7 +51,7 @@ export function openPinball(ctx, { autoLoop = true } = {}) {
 
   const win = wm.open({
     appId: 'pinball', title: 'Pinball', icon: 'pinball', width: 760, height: 620, minWidth: 620, minHeight: 500, content: body,
-    onClose: () => { cancelAnimationFrame(raf); input.detach(); observer?.disconnect(); },
+    onClose: () => { cancelAnimationFrame(raf); input.detach(); observer?.disconnect(); offMinimize?.(); },
   });
 
   function fit() {
@@ -80,6 +81,7 @@ export function openPinball(ctx, { autoLoop = true } = {}) {
     if (record) { high = table.score; storage.set(HIGH_KEY, String(high)); }
     updatePanel();
     const again = await dialogs.message({ title: 'Pinball', kind: 'question', owner: win, buttons: ['Yes', 'No'], text: `Game over!\nScore: ${table.score.toLocaleString()}${record ? '  (new high score!)' : ''}\n\nPlay again?` });
+    body.focus({ preventScroll: true });
     if (again === 'Yes') newGame();
   }
   function handleEvents(events) {
@@ -125,7 +127,7 @@ export function openPinball(ctx, { autoLoop = true } = {}) {
 
   input.onKey('F2', newGame);
   input.onKey('F3', togglePause);
-  wm.on('minimize', (w) => { if (w === win && !paused && table.state !== 'over') togglePause(); });
+  offMinimize = wm.on('minimize', (w) => { if (w === win && !paused && table.state !== 'over') togglePause(); });
   body.addEventListener('pointerdown', () => body.focus({ preventScroll: true }));
   attachMenubar(q('.pb-menubar'), menus, {
     Game: () => [
@@ -136,7 +138,7 @@ export function openPinball(ctx, { autoLoop = true } = {}) {
       { separator: true },
       { label: 'Exit', action: () => win.close() },
     ],
-    Help: [{ label: 'About Pinball', action: () => dialogs.message({ title: 'About Pinball', owner: win, text: 'An original table in plain JavaScript: circle-vs-segment physics at 240 steps per second, flippers with real angular velocity, and an S-T-E-P-H-E-N lane bonus.\n\nZ and / flip, hold Space to launch, X and . nudge (three quick nudges tilt), F2 new game, F3 pause.' }) }],
+    Help: [{ label: 'About Pinball', action: async () => { await dialogs.message({ title: 'About Pinball', owner: win, text: 'An original table in plain JavaScript: circle-vs-segment physics at 240 steps per second, flippers with real angular velocity, and an S-T-E-P-H-E-N lane bonus.\n\nZ and / flip, hold Space to launch, X and . nudge (three quick nudges tilt), F2 new game, F3 pause.' }); body.focus({ preventScroll: true }); } }],
   });
 
   updatePanel();
