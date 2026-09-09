@@ -62,6 +62,7 @@ Pushing to `main` runs tests, builds, and deploys to GitHub Pages
 - "Low FX" (bottom right) turns bloom off and caps resolution for slower machines; the choice is remembered.
 - Phones, tablets and browsers without WebGL2 skip the room and get the desktop full screen. Force a mode with `?mode=room` or `?mode=flat`.
 - Minesweeper: left click reveals, right click flags (then ?), middle click or Shift+click chords, F2 new game. Best times are stored in the browser.
+- Solitaire: drag runs, double-click sends a card to its foundation, click the stock to draw, F2 deals, Ctrl+Z undoes one move. Options and card back are remembered.
 - Picture viewer: left and right arrows move between photos, Escape closes, and the button strip toggles best fit and actual size.
 
 ## Manual QA checklist
@@ -88,6 +89,7 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 - [ ] resume.json (homepage) and resume-main.pdf agree on jobs/skills — re-run `npm run sync-resume` if Resume's CI has published a newer PDF
 - [ ] Boot logo shows the rippling four-colour flag beside "Windows XP"; Start button flag matches; in room mode the CRT glows from the BIOS text onward
 - [ ] Minesweeper: three levels resize the window; win and loss paths; best-time prompt; sounds and mute
+- [ ] Solitaire: draw one/three, valid and invalid drops, scoring and timer, undo, deck change, win cascade and dialog
 - [ ] My Pictures lists every project folder; each opens in Thumbnails view with images painted
 - [ ] The task pane shows the project name, tagline, description and tech tags; clicking a photo shows its dimensions
 - [ ] Double-clicking a photo opens the viewer; Previous, Next, arrow keys and the fit toggle all work; the buttons disable at each end
@@ -101,7 +103,7 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 2. ~~three.js cyberpunk bedroom with the CSS3D screen~~ done
 3. ~~Minesweeper~~ done
 4. ~~Portfolio import from GBC, replacing the Wix site~~ done
-5. Solitaire
+5. ~~Solitaire~~ done
 6. Pinball
 7. Polish and performance pass
 
