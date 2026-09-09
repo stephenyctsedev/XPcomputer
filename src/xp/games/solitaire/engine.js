@@ -111,7 +111,7 @@ export function fromState({ draw = 1, stock = [], waste = [], foundations = [[],
     const cards = peek(source);
     if (!cards.length) return null;
     if (target.type === 'foundation') {
-      if (cards.length !== 1 || !canPlaceOnFoundation(cards[0], game.foundations[target.index])) return null;
+      if (source.type === 'foundation' || cards.length !== 1 || !canPlaceOnFoundation(cards[0], game.foundations[target.index])) return null;
     } else if (target.type === 'tableau') {
       if (source.type === 'tableau' && source.col === target.col) return null;
       if (!canStackOnTableau(cards[0], game.tableau[target.col])) return null;

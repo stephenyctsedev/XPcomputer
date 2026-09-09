@@ -74,6 +74,10 @@ describe('moves', () => {
     expect(g.foundations[0].map((c) => c.id)).toEqual(['C1', 'C2']);
     expect(g.autoToFoundation({ type: 'tableau', col: 1, index: 0 })).toBeNull();
   });
+  it('rejects foundation-to-foundation moves', () => {
+    const g = fromState({ foundations: [['H1'], [], [], []], tableau: [[], [], [], [], [], [], []] });
+    expect(g.moveStack({ type: 'foundation', index: 0 }, { type: 'foundation', index: 1 })).toBeNull();
+  });
 });
 
 describe('stock and waste', () => {
