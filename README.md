@@ -31,6 +31,21 @@ This rewrites `src/data/resume.json` and `public/resume/resume-main.pdf`.
 actual resume document as used in employer submissions. The `--include-phone`
 flag only affects the generated site content (`resume.json` / homepage).
 
+## Update the portfolio content
+
+`src/data/portfolio.json` and `public/portfolio/` are the source of truth. Edit
+the JSON directly to change a title, a description or a folder name.
+
+The importer that first brought the content over from the sibling `GBC_Portfolio`
+repo is still here and still works:
+
+    npm run sync-portfolio
+    npm run sync-portfolio -- --repo ../GBC_Portfolio
+
+It re-optimizes every photo, so it overwrites hand edits. The video is the one
+manual step: the script never runs ffmpeg, and prints the exact command to run
+when the encoded file is missing.
+
 ## Build and deploy
 
     npm run build        # dist/
@@ -47,6 +62,7 @@ Pushing to `main` runs tests, builds, and deploys to GitHub Pages
 - "Low FX" (bottom right) turns bloom off and caps resolution for slower machines; the choice is remembered.
 - Phones, tablets and browsers without WebGL2 skip the room and get the desktop full screen. Force a mode with `?mode=room` or `?mode=flat`.
 - Minesweeper: left click reveals, right click flags (then ?), middle click or Shift+click chords, F2 new game. Best times are stored in the browser.
+- Picture viewer: left and right arrows move between photos, Escape closes, and the button strip toggles best fit and actual size.
 
 ## Manual QA checklist
 
@@ -72,15 +88,22 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 - [ ] resume.json (homepage) and resume-main.pdf agree on jobs/skills — re-run `npm run sync-resume` if Resume's CI has published a newer PDF
 - [ ] Boot logo shows the rippling four-colour flag beside "Windows XP"; Start button flag matches; in room mode the CRT glows from the BIOS text onward
 - [ ] Minesweeper: three levels resize the window; win and loss paths; best-time prompt; sounds and mute
+- [ ] My Pictures lists every project folder; each opens in Thumbnails view with images painted
+- [ ] The task pane shows the project name, tagline, description and tech tags; clicking a photo shows its dimensions
+- [ ] Double-clicking a photo opens the viewer; Previous, Next, arrow keys and the fit toggle all work; the buttons disable at each end
+- [ ] "View as a slide show" advances on its own and stops at the last photo; clicking Next cancels it
+- [ ] The MEGABOX video plays in the viewer and starts muted when the tray speaker is muted
+- [ ] The desktop My Pictures icon, the Start menu entry and the homepage Projects link all reach the folder
 
 ## Roadmap
 
 1. Skeleton, resume pipeline, XP shell, IE/Explorer/Notepad (this plan) — done when the checklist passes
 2. ~~three.js cyberpunk bedroom with the CSS3D screen~~ done
 3. ~~Minesweeper~~ done
-4. Solitaire
-5. Pinball
-6. Polish and performance pass
+4. ~~Portfolio import from GBC, replacing the Wix site~~ done
+5. Solitaire
+6. Pinball
+7. Polish and performance pass
 
 ## Licensing
 
