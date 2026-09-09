@@ -78,6 +78,10 @@
 .xp-view-details .xp-item { flex-direction: row; width: 100%; padding: 2px 4px; gap: 8px; }
 .xp-view-details .xp-item-label { flex: 1; text-align: left; }
 .xp-view-details .xp-item-type { width: 120px; color: #555; text-align: left; }
+.xp-view-thumbnails { gap: 10px 12px; }
+.xp-view-thumbnails .xp-item { width: 116px; }
+.xp-item-thumb { width: 96px; height: 72px; object-fit: cover; background: #fff; border: 1px solid #7a7a7a; padding: 3px; }
+.xp-item.selected .xp-item-thumb { border-color: #0c327d; }
 .xp-item-header { border-bottom: 1px solid #d8d2bd; color: #444; pointer-events: none; }
 
 /* ---- Notepad ---- */

@@ -13,10 +13,12 @@ export function registerExplorer(registry) {
 }
 
 export function openExplorer(ctx, startPath = PATHS.myComputer) {
-  const { wm, fs, registry, dialogs, menus, toDesktopPoint } = ctx;
+  const { wm, fs, registry, dialogs, menus, toDesktopPoint, mediaBase = '' } = ctx;
   const history = [startPath];
   let index = 0;
   let view = 'icons';
+  // Auto-pick stays on until the user chooses a view, then that choice owns the window.
+  let viewLocked = false;
 
   const body = document.createElement('div');
   body.className = 'xp-explorer';
@@ -50,6 +52,7 @@ export function openExplorer(ctx, startPath = PATHS.myComputer) {
   const selectedNode = () => currentNode().children?.find((c) => c.name === items.querySelector('.xp-item.selected')?.dataset.name);
   const notAvailable = () => dialogs.message({ title: 'Windows Explorer', kind: 'info', owner: win, text: 'This feature is not available in the demo.' });
   const viewItems = () => [
+    { label: 'Thumbnails', checked: view === 'thumbnails', action: () => setView('thumbnails') },
     { label: 'Icons', checked: view === 'icons', action: () => setView('icons') },
     { label: 'Details', checked: view === 'details', action: () => setView('details') },
   ];
@@ -61,7 +64,11 @@ export function openExplorer(ctx, startPath = PATHS.myComputer) {
     render();
   }
   function go(delta) { index = Math.min(Math.max(index + delta, 0), history.length - 1); render(); }
-  function setView(next) { view = next; render(); }
+  function setView(next) { view = next; viewLocked = true; render(); }
+  function autoView(node) {
+    const children = node.children ?? [];
+    return children.length > 0 && children.every((c) => c.mediaKind) ? 'thumbnails' : 'icons';
+  }
   function openNode(node) {
     if (node.open?.app === 'explorer') { navigate(node.open.payload.path); return; }
     if (node.open) { registry.launch(node.open.app, { ...(node.open.payload ?? {}), owner: win }); return; }
@@ -73,7 +80,16 @@ export function openExplorer(ctx, startPath = PATHS.myComputer) {
     el.type = 'button';
     el.className = 'xp-item';
     el.dataset.name = child.name;
-    el.append(iconEl(child.icon, view === 'details' ? 16 : 32));
+    if (view === 'thumbnails' && child.thumb) {
+      const img = document.createElement('img');
+      img.className = 'xp-item-thumb';
+      img.src = `${mediaBase}${child.thumb}`;
+      img.alt = '';
+      img.addEventListener('error', () => img.replaceWith(iconEl(child.icon, 32)));
+      el.append(img);
+    } else {
+      el.append(iconEl(child.icon, view === 'details' ? 16 : 32));
+    }
     const label = document.createElement('span');
     label.className = 'xp-item-label';
     label.textContent = child.name;
@@ -112,6 +128,7 @@ export function openExplorer(ctx, startPath = PATHS.myComputer) {
 
   function render() {
     const node = currentNode();
+    if (!viewLocked) view = autoView(node);
     address.value = node.path;
     addressIcon.replaceChildren(iconEl(node.icon, 16));
     win.setTitle(node.name);

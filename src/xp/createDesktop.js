@@ -27,7 +27,7 @@ function defaultOpenExternal(url) {
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 
-export function createDesktop(rootEl, { resume, pdfHref, repoUrl, storage = safeStorage(), reducedMotion = false, openExternal = defaultOpenExternal } = {}) {
+export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = '', repoUrl, storage = safeStorage(), reducedMotion = false, openExternal = defaultOpenExternal } = {}) {
   rootEl.classList.add('xp-screen');
   rootEl.tabIndex = -1;
   rootEl.innerHTML = `
@@ -50,13 +50,13 @@ export function createDesktop(rootEl, { resume, pdfHref, repoUrl, storage = safe
   const wm = createWindowManager(rootEl.querySelector('.xp-windows'));
   const dialogs = createDialogs(wm, { sounds });
   const menus = createMenus(rootEl, { sounds });
-  const fs = buildFileSystem(resume);
+  const fs = buildFileSystem(resume, portfolio);
   const toDesktopPoint = (clientX, clientY) => {
     const rect = rootEl.getBoundingClientRect();
     const s = rect.width / DESKTOP_WIDTH || 1;
     return { x: (clientX - rect.left) / s, y: (clientY - rect.top) / s };
   };
-  const ctx = { wm, dialogs, menus, sounds, resume, fs, pdfHref, repoUrl, storage, openExternal, screenEl: rootEl, toDesktopPoint };
+  const ctx = { wm, dialogs, menus, sounds, resume, portfolio, fs, pdfHref, mediaBase, repoUrl, storage, openExternal, screenEl: rootEl, toDesktopPoint };
   const registry = createRegistry(ctx);
   ctx.registry = registry;
   registerInternetExplorer(registry);

@@ -2,15 +2,17 @@ import './styles/base.css';
 import { pickMode, detectEnv } from './modes.js';
 import { createDesktop } from './xp/createDesktop.js';
 import resume from './data/resume.json';
+import portfolio from './data/portfolio.json';
 
 const REPO_URL = 'https://github.com/stephenyctsedev/XPcomputer';
 const pdfHref = `${import.meta.env.BASE_URL}resume/resume-main.pdf`;
+const mediaBase = import.meta.env.BASE_URL;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const app = document.querySelector('#app');
 const mode = pickMode(detectEnv());
 
 const screenEl = document.createElement('div');
-const desktop = createDesktop(screenEl, { resume, pdfHref, repoUrl: REPO_URL, reducedMotion });
+const desktop = createDesktop(screenEl, { resume, portfolio, pdfHref, mediaBase, repoUrl: REPO_URL, reducedMotion });
 
 (async () => {
   if (mode === 'room') {
