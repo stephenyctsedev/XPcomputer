@@ -84,7 +84,13 @@ export function createRoom(container, screenElement, { reducedMotion = false, lo
         fitFlatScreen();
         emit('screenFocused');
       }
-      if (s === 'overview') { screenElement.style.transform = restingTransform ?? ''; emit('screenLeft'); }
+      // Restore on the way OUT (not on arrival at 'overview'): cssRenderer.render() resumes and
+      // silently reclaims the element into cameraElement as soon as state stops being 'screen',
+      // i.e. from the first frame of 'toOverview' -- restoring later left it flying back across
+      // the room still carrying the flat scale() transform, flashing the wallpaper full-screen
+      // for the whole flight before finally correcting itself on arrival.
+      if (s === 'toOverview') screenElement.style.transform = restingTransform ?? '';
+      if (s === 'overview') emit('screenLeft');
     },
   });
   const effects = createEffects(renderer, scene, camera, { lowFx });
