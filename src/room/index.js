@@ -2,11 +2,12 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js';
 import { buildRoom } from './Room.js';
-import { buildComputer } from './Computer.js';
+import { buildComputer, SCREEN } from './Computer.js';
 import { createCameraRig } from './CameraRig.js';
 import { createEffects } from './Effects.js';
 import { createInteraction } from './Interaction.js';
 import { makeRoomTextures } from './textures.js';
+import { containScale } from './cameraFit.js';
 
 /** Dispose every geometry/material (and any map/emissiveMap texture they hold) under `root`. */
 function disposeSceneResources(root) {
@@ -33,7 +34,17 @@ export function createRoom(container, screenElement, { reducedMotion = false, lo
   renderer.domElement.className = 'room-canvas';
   const cssRenderer = new CSS3DRenderer();
   cssRenderer.domElement.className = 'room-css-layer';
-  container.append(renderer.domElement, cssRenderer.domElement);
+  // Chrome does not reliably hit-test a `pointer-events: auto` element nested inside a
+  // `transform-style: preserve-3d` chain whose ancestors are `pointer-events: none` (confirmed
+  // live: elementFromPoint() skips straight past the whole CSS3D layer to the WebGL canvas
+  // behind it, even though the element's own projected rect and computed transform are both
+  // correct) -- so the screen would render fine but never actually be clickable. Once the
+  // camera arrives, this plain flat layer takes over showing screenElement with a normal 2D
+  // `scale()` instead, which hit-tests normally; CSS3DRenderer reclaims the element on its own
+  // (it re-parents anything not already under its internal camera element) once flight resumes.
+  const flatScreen = document.createElement('div');
+  flatScreen.className = 'room-flat-screen';
+  container.append(renderer.domElement, cssRenderer.domElement, flatScreen);
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(50, 1, 0.05, 40);
@@ -51,9 +62,30 @@ export function createRoom(container, screenElement, { reducedMotion = false, lo
   controls.minAzimuthAngle = -1.15;
   controls.maxAzimuthAngle = 1.15;
 
+  const fitFlatScreen = () => {
+    const w = container.clientWidth || window.innerWidth;
+    const h = container.clientHeight || window.innerHeight;
+    const scale = containScale({ boxWidth: w, boxHeight: h, contentWidth: SCREEN.pixelsWide, contentHeight: SCREEN.pixelsTall });
+    screenElement.style.transform = `scale(${scale})`;
+  };
+  // CSS3DRenderer caches each object's *own* transform string (screenElement's position/scale
+  // in the scene, which never changes) and only rewrites element.style.transform when that
+  // string differs from last time -- so once fitFlatScreen() overwrites it, CSS3DRenderer has
+  // no way to notice its cached value no longer matches the DOM and never restores it. Snapshot
+  // the resting value it set on its own before we ever touch the element, and put that back by
+  // hand when handing the element back, rather than trusting CSS3DRenderer to reapply it.
+  let restingTransform = null;
   const rig = createCameraRig(camera, controls, {
     screenCenter: computer.screenCenter, screenNormal: computer.screenNormal, screenSize: computer.size, reducedMotion,
-    onState: (s) => { if (s === 'screen') emit('screenFocused'); if (s === 'overview') emit('screenLeft'); },
+    onState: (s) => {
+      if (s === 'screen') {
+        restingTransform ??= screenElement.style.transform;
+        flatScreen.append(screenElement);
+        fitFlatScreen();
+        emit('screenFocused');
+      }
+      if (s === 'overview') { screenElement.style.transform = restingTransform ?? ''; emit('screenLeft'); }
+    },
   });
   const effects = createEffects(renderer, scene, camera, { lowFx });
   const interaction = createInteraction(renderer.domElement, camera, [computer.hitbox], {
@@ -70,6 +102,7 @@ export function createRoom(container, screenElement, { reducedMotion = false, lo
     effects.setSize(w, h);
     cssRenderer.setSize(w, h);
     rig.onResize();
+    if (rig.state === 'screen') fitFlatScreen();
   };
   resize();
   window.addEventListener('resize', resize);
@@ -87,7 +120,9 @@ export function createRoom(container, screenElement, { reducedMotion = false, lo
     room.animate(t, dt);
     computer.animate(t);
     effects.render();
-    cssRenderer.render(scene, camera);
+    // Skip while fully focused: screenElement now lives in flatScreen (see onState above), and
+    // rendering here would just re-parent it back under CSS3DRenderer's own camera element.
+    if (rig.state !== 'screen') cssRenderer.render(scene, camera);
     if (++frames === 2) emit('firstFrame');
   };
   const start = () => { if (running) return; running = true; clock.getDelta(); frame(); };

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
 
-export const SCREEN = { width: 0.32, height: 0.24, pixelsWide: 1024 };
+export const SCREEN = { width: 0.32, height: 0.24, pixelsWide: 1024, pixelsTall: 768 };
 
 /** Beige PC on the desk. `position` is the desk surface point under the monitor stand. */
 export function buildComputer(parent, { screenElement, position = new THREE.Vector3(-0.8, 0.76, -1.55) } = {}) {
