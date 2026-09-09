@@ -22,4 +22,19 @@ describe('registerGames', () => {
   it('ships loaders for all three games', () => {
     expect(Object.keys(GAME_LOADERS).sort()).toEqual(['pinball', 'sol', 'winmine']);
   });
+  it('surfaces an error dialog when a loader fails to load', async () => {
+    const ctx = { reducedMotion: true, dialogs: { message: () => {} } };
+    const registry = createRegistry(ctx);
+    const messages = [];
+    ctx.dialogs.message = (msg) => { messages.push(msg); };
+    registerGames(registry, {
+      broken: { name: 'Broken Game', icon: 'cards', load: async () => { throw new Error('Network failure'); }, open: 'openBroken' },
+    });
+    await registry.launch('broken');
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toEqual({
+      title: 'Windows', kind: 'error',
+      text: 'Cannot start Broken Game. This program cannot be started.',
+    });
+  });
 });

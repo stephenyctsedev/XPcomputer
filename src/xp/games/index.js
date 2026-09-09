@@ -11,8 +11,15 @@ export function registerGames(registry, loaders = GAME_LOADERS) {
       name: def.name,
       icon: def.icon,
       launch: async (ctx) => {
-        const mod = await def.load();
-        return def.options ? mod[def.open](ctx, def.options(ctx)) : mod[def.open](ctx);
+        try {
+          const mod = await def.load();
+          return def.options ? mod[def.open](ctx, def.options(ctx)) : mod[def.open](ctx);
+        } catch (err) {
+          return ctx.dialogs.message({
+            title: 'Windows', kind: 'error',
+            text: `Cannot start ${def.name}. This program cannot be started.`,
+          });
+        }
       },
     });
   }
