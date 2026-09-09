@@ -68,4 +68,14 @@ describe('Pinball window', () => {
     expect(ctx.dialogs.message.mock.calls[0][0].text).toContain('Game over');
     expect(played).toContain('drain');
   });
+
+  it('unsubscribes its window-manager minimize listener when the window closes', () => {
+    const win = open();
+    win.close();
+    // If the minimize listener registered by openPinball leaked (the bug this guards against),
+    // this would call togglePause() and flip the "Paused" mission text even though the window
+    // (and the game loop with it) is gone.
+    win.minimize();
+    expect(win.el.querySelector('.pb-mission').textContent).not.toContain('Paused');
+  });
 });

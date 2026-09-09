@@ -23,8 +23,10 @@ export function openPinball(ctx, { autoLoop = true } = {}) {
   let raf = 0;
   let last = 0;
   let accumulator = 0;
+  const pendingNudge = { nudgeLeft: false, nudgeRight: false };
   let gameOverShown = false;
   let offMinimize = null;
+  let observer = null;
 
   const body = document.createElement('div');
   body.className = 'pb';
@@ -46,7 +48,7 @@ export function openPinball(ctx, { autoLoop = true } = {}) {
   const canvas = body.querySelector('canvas');
   const tableEl = body.querySelector('.pb-table');
   const renderer = createRenderer(canvas);
-  const input = createInput(body);
+  const input = createInput(document, { enabled: () => win.isFocused });
   const q = (selector) => body.querySelector(selector);
 
   const win = wm.open({
@@ -59,7 +61,7 @@ export function openPinball(ctx, { autoLoop = true } = {}) {
     const h = tableEl.clientHeight || 700;
     renderer.resize(Math.max(0.3, Math.min(w / 400, h / 700)), window.devicePixelRatio || 1);
   }
-  const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(fit) : null;
+  observer = typeof ResizeObserver === 'function' ? new ResizeObserver(fit) : null;
   observer?.observe(tableEl);
   fit();
 
@@ -81,24 +83,29 @@ export function openPinball(ctx, { autoLoop = true } = {}) {
     if (record) { high = table.score; storage.set(HIGH_KEY, String(high)); }
     updatePanel();
     const again = await dialogs.message({ title: 'Pinball', kind: 'question', owner: win, buttons: ['Yes', 'No'], text: `Game over!\nScore: ${table.score.toLocaleString()}${record ? '  (new high score!)' : ''}\n\nPlay again?` });
-    body.focus({ preventScroll: true });
     if (again === 'Yes') newGame();
   }
   function handleEvents(events) {
     for (const e of events) {
       const cue = SOUND_FOR[e.type];
       if (cue) sounds.play(cue);
-      if (e.type === 'gameOver') onGameOver();
+      if (e.type === 'gameOver') onGameOver().catch(() => {});
     }
   }
-  /** Advance the simulation by `seconds` in fixed 1/240 s steps. Nudges apply to the first step only. */
+  /** Advance the simulation by `seconds` in fixed 1/240 s steps. Nudges apply to the first step that
+   * actually runs; on very high refresh rates a single call's `seconds` can be smaller than STEP, so a
+   * one-shot nudge captured this frame is carried in `pendingNudge` until a step consumes it, instead of
+   * being silently dropped by a call that ends up running zero substeps. */
   function advance(seconds) {
     const frameInput = input.frame();
+    if (frameInput.nudgeLeft) pendingNudge.nudgeLeft = true;
+    if (frameInput.nudgeRight) pendingNudge.nudgeRight = true;
     if (paused || table.state === 'over') return;
     accumulator += seconds;
     let first = true;
     while (accumulator >= STEP - 1e-12) {
-      handleEvents(stepTable(table, STEP, first ? frameInput : { ...frameInput, nudgeLeft: false, nudgeRight: false }));
+      handleEvents(stepTable(table, STEP, first ? { ...frameInput, ...pendingNudge } : { ...frameInput, nudgeLeft: false, nudgeRight: false }));
+      if (first) { pendingNudge.nudgeLeft = false; pendingNudge.nudgeRight = false; }
       accumulator -= STEP;
       first = false;
     }
@@ -108,7 +115,7 @@ export function openPinball(ctx, { autoLoop = true } = {}) {
     const dt = Math.min(0.05, (now - (last || now)) / 1000);
     last = now;
     advance(dt);
-    renderer.draw(table);
+    if (!win.isMinimized) renderer.draw(table);
     updatePanel();
   }
   function newGame() {
@@ -138,7 +145,7 @@ export function openPinball(ctx, { autoLoop = true } = {}) {
       { separator: true },
       { label: 'Exit', action: () => win.close() },
     ],
-    Help: [{ label: 'About Pinball', action: async () => { await dialogs.message({ title: 'About Pinball', owner: win, text: 'An original table in plain JavaScript: circle-vs-segment physics at 240 steps per second, flippers with real angular velocity, and an S-T-E-P-H-E-N lane bonus.\n\nZ and / flip, hold Space to launch, X and . nudge (three quick nudges tilt), F2 new game, F3 pause.' }); body.focus({ preventScroll: true }); } }],
+    Help: [{ label: 'About Pinball', action: async () => { await dialogs.message({ title: 'About Pinball', owner: win, text: 'An original table in plain JavaScript: circle-vs-segment physics at 240 steps per second, flippers with real angular velocity, and an S-T-E-P-H-E-N lane bonus.\n\nZ and / flip, hold Space to launch, X and . nudge (three quick nudges tilt), F2 new game, F3 pause.' }); } }],
   });
 
   updatePanel();
