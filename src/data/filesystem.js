@@ -12,6 +12,23 @@ const file = (name, icon, open) => ({ name, kind: 'file', icon, open });
 const exe = (name, app, icon = 'exe') => ({ name, kind: 'exe', icon, open: { app } });
 const shortcut = (name, icon, open) => ({ name, kind: 'shortcut', icon, open });
 const notepadFile = (name, text) => file(name, 'txt', { app: 'notepad', payload: { title: name, text } });
+const mediaFile = (item, slug, index) => ({
+  name: item.file,
+  kind: 'file',
+  icon: item.kind === 'video' ? 'video' : 'image',
+  mediaKind: item.kind,
+  src: item.src,
+  thumb: item.thumb ?? null,
+  width: item.width ?? null,
+  height: item.height ?? null,
+  open: { app: 'viewer', payload: { slug, index, slideshow: false } },
+});
+
+const projectFolder = (project) => folder(
+  project.folder,
+  project.media.map((item, index) => mediaFile(item, project.slug, index)),
+  { icon: 'pictures', project },
+);
 const driveError = (title, text) => ({ app: 'error', payload: { title, text, buttons: ['Retry', 'Cancel'] } });
 const binError = { app: 'error', payload: { title: 'Recycle Bin', text: 'This file is in the Recycle Bin. Restore it before opening it.' } };
 
@@ -30,12 +47,12 @@ JavaScript. No Microsoft artwork or sounds are used.
 
 Where to look:
   * Internet Explorer  -> my homepage and the PDF resume
+  * My Documents\\My Pictures -> screenshots from every project I have shipped
   * My Documents\\Projects -> one text file per job
   * Start > All Programs > Games -> Minesweeper, Solitaire, Pinball
 
 Contact: ${resume.contact.email}
 LinkedIn: ${resume.contact.linkedin}
-Portfolio: ${resume.contact.portfolio}
 `;
 
 const todoText = `TODO
@@ -49,10 +66,10 @@ const todoText = `TODO
 [ ] Get hired (you can help with this one)
 `;
 
-export function buildFileSystem(resume) {
+export function buildFileSystem(resume, portfolio = { projects: [] }) {
   const projects = resume.experience.map((job) => notepadFile(`${safeName(job.company)}.txt`, jobText(job)));
   const myDocuments = folder('My Documents', [
-    folder('My Pictures', [shortcut('portfolio.url', 'url', { app: 'external', payload: { url: resume.contact.portfolio } })]),
+    folder('My Pictures', (portfolio.projects ?? []).map(projectFolder), { icon: 'pictures' }),
     folder('My Music', []),
     folder('Projects', projects),
     file('resume.pdf', 'pdf', { app: 'reader' }),
