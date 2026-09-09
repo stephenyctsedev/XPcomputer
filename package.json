@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "sync-resume": "node scripts/sync-resume.mjs"
+    "sync-resume": "node scripts/sync-resume.mjs",
+    "sync-portfolio": "node scripts/sync-portfolio.mjs"
   },
   "dependencies": {
     "three": "^0.185.1",
@@ -18,6 +19,7 @@
   },
   "devDependencies": {
     "jsdom": "^29.1.1",
+    "sharp": "^0.35.4",
     "vite": "^8.2.2",
     "vitest": "^5.0.0"
   }

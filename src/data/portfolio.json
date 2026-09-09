@@ -1,0 +1,401 @@
+{
+  "projects": [
+    {
+      "slug": "coin-pusher",
+      "folder": "Coin Pusher",
+      "name": "Personal Project - Coin Pusher Game",
+      "category": "personal",
+      "tagline": "Coin pusher game built with PlayCanvas and JavaScript.",
+      "description": "Touch and drop coins into the machine, aiming to push them into the reward area. When a coin lands in the designated spot, the player receives an exciting bonus of three additional coins. With intuitive controls and smooth physics, this addictive game offers endless fun in a clean and minimalist design. Enjoy quick sessions and test your skills wherever you go, as this game ensures a seamless experience across multiple devices.",
+      "tech": [
+        "PlayCanvas",
+        "JavaScript"
+      ],
+      "media": [
+        {
+          "file": "img1.jpg",
+          "kind": "image",
+          "src": "portfolio/coin-pusher/img1.jpg",
+          "thumb": "portfolio/coin-pusher/thumbs/img1.jpg",
+          "width": 158,
+          "height": 228
+        }
+      ]
+    },
+    {
+      "slug": "megabox-emoji",
+      "folder": "MEGABOX × EMOJI",
+      "name": "MEGABOX × EMOJI \"YEAR OF THE SMILEY TIGER\"",
+      "category": "company",
+      "tagline": "\"New Year emoji® Hunt\" AR Game @ MegaBox",
+      "description": "Scan the QR code with your mobile phone in the decoration and start searching for emoji® around the decoration to score. Participants will have a chance to win amazing prizes upon scoring designated points in game!",
+      "tech": [
+        "PlayCanvas",
+        "JavaScript"
+      ],
+      "media": [
+        {
+          "file": "img1.jpg",
+          "kind": "image",
+          "src": "portfolio/megabox-emoji/img1.jpg",
+          "thumb": "portfolio/megabox-emoji/thumbs/img1.jpg",
+          "width": 1600,
+          "height": 849
+        },
+        {
+          "file": "img2.jpg",
+          "kind": "image",
+          "src": "portfolio/megabox-emoji/img2.jpg",
+          "thumb": "portfolio/megabox-emoji/thumbs/img2.jpg",
+          "width": 1600,
+          "height": 1066
+        },
+        {
+          "file": "img3.jpg",
+          "kind": "image",
+          "src": "portfolio/megabox-emoji/img3.jpg",
+          "thumb": "portfolio/megabox-emoji/thumbs/img3.jpg",
+          "width": 1600,
+          "height": 863
+        },
+        {
+          "file": "video1.mp4",
+          "kind": "video",
+          "src": "portfolio/megabox-emoji/video1.mp4",
+          "thumb": null
+        }
+      ]
+    },
+    {
+      "slug": "beer-happy-challenge",
+      "folder": "Beer Happy Challenge",
+      "name": "Wild West Adventure Christmas Market @Stanley Plaza — Beer Happy Challenge",
+      "category": "company",
+      "tagline": "Beer push mini-game for Stanley Plaza's Wild West Adventure Christmas Market.",
+      "description": "Push beer mini-game built for Stanley Plaza's Wild West Adventure Christmas Market 2021. Players push beer bottles across the board to score points in a festive competitive challenge.",
+      "tech": [
+        "PlayCanvas",
+        "JavaScript"
+      ],
+      "media": [
+        {
+          "file": "img1.jpg",
+          "kind": "image",
+          "src": "portfolio/beer-happy-challenge/img1.jpg",
+          "thumb": "portfolio/beer-happy-challenge/thumbs/img1.jpg",
+          "width": 739,
+          "height": 1600
+        },
+        {
+          "file": "img2.jpg",
+          "kind": "image",
+          "src": "portfolio/beer-happy-challenge/img2.jpg",
+          "thumb": "portfolio/beer-happy-challenge/thumbs/img2.jpg",
+          "width": 739,
+          "height": 1600
+        },
+        {
+          "file": "img3.jpg",
+          "kind": "image",
+          "src": "portfolio/beer-happy-challenge/img3.jpg",
+          "thumb": "portfolio/beer-happy-challenge/thumbs/img3.jpg",
+          "width": 739,
+          "height": 1600
+        },
+        {
+          "file": "img4.jpg",
+          "kind": "image",
+          "src": "portfolio/beer-happy-challenge/img4.jpg",
+          "thumb": "portfolio/beer-happy-challenge/thumbs/img4.jpg",
+          "width": 739,
+          "height": 1600
+        }
+      ]
+    },
+    {
+      "slug": "monster-inc-cityplaza",
+      "folder": "Monster Inc × CityPlaza",
+      "name": "Monster Inc × CityPlaza",
+      "category": "company",
+      "tagline": "Gift-repacking mini-game for CityPlaza's Monster Inc activation.",
+      "description": "A mobile mini-game built for the Monster Inc × CityPlaza event, where players repack and rearrange gifts on their phones. WebSocket connects the client phone to the gaming booth in real time. Developed with PlayCanvas and JavaScript.",
+      "tech": [
+        "PlayCanvas",
+        "JavaScript",
+        "WebSocket"
+      ],
+      "media": [
+        {
+          "file": "img1.jpg",
+          "kind": "image",
+          "src": "portfolio/monster-inc-cityplaza/img1.jpg",
+          "thumb": "portfolio/monster-inc-cityplaza/thumbs/img1.jpg",
+          "width": 1600,
+          "height": 1066
+        },
+        {
+          "file": "img2.jpg",
+          "kind": "image",
+          "src": "portfolio/monster-inc-cityplaza/img2.jpg",
+          "thumb": "portfolio/monster-inc-cityplaza/thumbs/img2.jpg",
+          "width": 1600,
+          "height": 1066
+        },
+        {
+          "file": "img3.jpg",
+          "kind": "image",
+          "src": "portfolio/monster-inc-cityplaza/img3.jpg",
+          "thumb": "portfolio/monster-inc-cityplaza/thumbs/img3.jpg",
+          "width": 1600,
+          "height": 1066
+        }
+      ]
+    },
+    {
+      "slug": "nat-geo-rac-club",
+      "folder": "Nat Geo Kids RAC Club",
+      "name": "Nat Geo Kids RAC Club",
+      "category": "company",
+      "tagline": "Kids reading platform built with National Geographic.",
+      "description": "A gamified reading platform developed in partnership with National Geographic. Children log in to read books, complete quizzes, and earn scores across multiple levels. Developed with Unity and C#, with a Strapi and MongoDB backend.",
+      "tech": [
+        "Unity",
+        "C#",
+        "Strapi",
+        "MongoDB"
+      ],
+      "media": [
+        {
+          "file": "img1.jpg",
+          "kind": "image",
+          "src": "portfolio/nat-geo-rac-club/img1.jpg",
+          "thumb": "portfolio/nat-geo-rac-club/thumbs/img1.jpg",
+          "width": 1600,
+          "height": 739
+        },
+        {
+          "file": "img2.jpg",
+          "kind": "image",
+          "src": "portfolio/nat-geo-rac-club/img2.jpg",
+          "thumb": "portfolio/nat-geo-rac-club/thumbs/img2.jpg",
+          "width": 1600,
+          "height": 739
+        },
+        {
+          "file": "img3.jpg",
+          "kind": "image",
+          "src": "portfolio/nat-geo-rac-club/img3.jpg",
+          "thumb": "portfolio/nat-geo-rac-club/thumbs/img3.jpg",
+          "width": 360,
+          "height": 360
+        }
+      ]
+    },
+    {
+      "slug": "bt21-extensive-reading",
+      "folder": "Extensive Reading BT21",
+      "name": "Extensive Reading with BT21",
+      "category": "company",
+      "tagline": "Gamified reading assessment platform featuring BT21 characters.",
+      "description": "An extensive reading and assessment platform built in partnership with BT21. Students log in to read passages, answer comprehension and vocabulary questions, and earn scores tracked on a leaderboard. Built with Unity and C#, using AWS RDS and EC2 with a PHP API backend.",
+      "tech": [
+        "Unity",
+        "C#",
+        "PHP",
+        "AWS RDS",
+        "AWS EC2"
+      ],
+      "media": [
+        {
+          "file": "img1.jpg",
+          "kind": "image",
+          "src": "portfolio/bt21-extensive-reading/img1.jpg",
+          "thumb": "portfolio/bt21-extensive-reading/thumbs/img1.jpg",
+          "width": 1542,
+          "height": 715
+        },
+        {
+          "file": "img2.jpg",
+          "kind": "image",
+          "src": "portfolio/bt21-extensive-reading/img2.jpg",
+          "thumb": "portfolio/bt21-extensive-reading/thumbs/img2.jpg",
+          "width": 1543,
+          "height": 714
+        },
+        {
+          "file": "img3.jpg",
+          "kind": "image",
+          "src": "portfolio/bt21-extensive-reading/img3.jpg",
+          "thumb": "portfolio/bt21-extensive-reading/thumbs/img3.jpg",
+          "width": 1542,
+          "height": 715
+        },
+        {
+          "file": "img4.jpg",
+          "kind": "image",
+          "src": "portfolio/bt21-extensive-reading/img4.jpg",
+          "thumb": "portfolio/bt21-extensive-reading/thumbs/img4.jpg",
+          "width": 360,
+          "height": 360
+        }
+      ]
+    },
+    {
+      "slug": "jurlique-catching-game",
+      "folder": "Jurlique Catching Game",
+      "name": "Jurlique Touch Screen Catching Game",
+      "category": "company",
+      "tagline": "Touch screen catching game connected to a live Jurlique vending machine.",
+      "description": "A touch screen catching game built for a Jurlique in-store activation. Players tap to catch floating ingredient bubbles on screen, and upon completing the game a physical vending machine dispenses a Jurlique gift for the player. Developed with Unity and C#.",
+      "tech": [
+        "Unity",
+        "C#"
+      ],
+      "media": [
+        {
+          "file": "img1.jpg",
+          "kind": "image",
+          "src": "portfolio/jurlique-catching-game/img1.jpg",
+          "thumb": "portfolio/jurlique-catching-game/thumbs/img1.jpg",
+          "width": 900,
+          "height": 1600
+        },
+        {
+          "file": "img2.jpg",
+          "kind": "image",
+          "src": "portfolio/jurlique-catching-game/img2.jpg",
+          "thumb": "portfolio/jurlique-catching-game/thumbs/img2.jpg",
+          "width": 900,
+          "height": 1600
+        },
+        {
+          "file": "img3.jpg",
+          "kind": "image",
+          "src": "portfolio/jurlique-catching-game/img3.jpg",
+          "thumb": "portfolio/jurlique-catching-game/thumbs/img3.jpg",
+          "width": 900,
+          "height": 1600
+        },
+        {
+          "file": "img4.jpg",
+          "kind": "image",
+          "src": "portfolio/jurlique-catching-game/img4.jpg",
+          "thumb": "portfolio/jurlique-catching-game/thumbs/img4.jpg",
+          "width": 900,
+          "height": 1600
+        }
+      ]
+    },
+    {
+      "slug": "helena-rubinstein-booth",
+      "folder": "Helena Rubinstein Booth",
+      "name": "Helena Rubinstein × Seoul Shilla Hotel Photo Booth",
+      "category": "company",
+      "tagline": "AR photo booth generating branded e-passports for Helena Rubinstein.",
+      "description": "An interactive photo booth built for Helena Rubinstein at the Seoul Shilla Hotel. Visitors take a photo which is processed through the remove.bg API to remove the background, then composited into a branded HR e-passport. Guests can download and share the photo on social media to redeem a personalised luggage tag. Developed with Unity and C#.",
+      "tech": [
+        "Unity",
+        "C#",
+        "remove.bg API"
+      ],
+      "media": [
+        {
+          "file": "img1.jpg",
+          "kind": "image",
+          "src": "portfolio/helena-rubinstein-booth/img1.jpg",
+          "thumb": "portfolio/helena-rubinstein-booth/thumbs/img1.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "file": "img2.jpg",
+          "kind": "image",
+          "src": "portfolio/helena-rubinstein-booth/img2.jpg",
+          "thumb": "portfolio/helena-rubinstein-booth/thumbs/img2.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "file": "img3.jpg",
+          "kind": "image",
+          "src": "portfolio/helena-rubinstein-booth/img3.jpg",
+          "thumb": "portfolio/helena-rubinstein-booth/thumbs/img3.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "file": "img4.jpg",
+          "kind": "image",
+          "src": "portfolio/helena-rubinstein-booth/img4.jpg",
+          "thumb": "portfolio/helena-rubinstein-booth/thumbs/img4.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "file": "img5.jpg",
+          "kind": "image",
+          "src": "portfolio/helena-rubinstein-booth/img5.jpg",
+          "thumb": "portfolio/helena-rubinstein-booth/thumbs/img5.jpg",
+          "width": 1600,
+          "height": 900
+        }
+      ]
+    },
+    {
+      "slug": "dior-lip-glow",
+      "folder": "Dior Lip Glow",
+      "name": "Dior Lip Glow Face Detection",
+      "category": "company",
+      "tagline": "Gesture-controlled mini-game for Dior's Lip Glow activation.",
+      "description": "A Dior-branded mini-game using gesture detection to engage shoppers in a fun interactive experience. Players who complete the challenge are rewarded with a QR code to redeem a Dior Lip Glow gift. Developed with Unity and C#.",
+      "tech": [
+        "Unity",
+        "C#"
+      ],
+      "media": [
+        {
+          "file": "img1.jpg",
+          "kind": "image",
+          "src": "portfolio/dior-lip-glow/img1.jpg",
+          "thumb": "portfolio/dior-lip-glow/thumbs/img1.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "file": "img2.jpg",
+          "kind": "image",
+          "src": "portfolio/dior-lip-glow/img2.jpg",
+          "thumb": "portfolio/dior-lip-glow/thumbs/img2.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "file": "img3.jpg",
+          "kind": "image",
+          "src": "portfolio/dior-lip-glow/img3.jpg",
+          "thumb": "portfolio/dior-lip-glow/thumbs/img3.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "file": "img4.jpg",
+          "kind": "image",
+          "src": "portfolio/dior-lip-glow/img4.jpg",
+          "thumb": "portfolio/dior-lip-glow/thumbs/img4.jpg",
+          "width": 1600,
+          "height": 900
+        },
+        {
+          "file": "img5.jpg",
+          "kind": "image",
+          "src": "portfolio/dior-lip-glow/img5.jpg",
+          "thumb": "portfolio/dior-lip-glow/thumbs/img5.jpg",
+          "width": 1600,
+          "height": 900
+        }
+      ]
+    }
+  ],
+  "source": "GBC_Portfolio@e5777f7",
+  "updated": "2026-09-09"
+}
