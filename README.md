@@ -148,6 +148,87 @@ though WebGL2 genuinely works (confirmed by forcing `?mode=room`, which renders 
 startup/GPU-warmup quirk of the automated engine itself, not something real browsers do, so it was
 left alone rather than "fixed".
 
+### Final QA pass (2026-09-10)
+
+A second agent pass walked every line of the checklist above end to end — in the same one
+Chromium-based automated engine, in both `?mode=flat` and the room, including boot, the Start
+menu and All Programs, window drag/resize/minimize/maximize/close, Explorer navigation and
+right-click Properties, Notepad's save prompt, all four power states (Turn Off, Restart, Stand
+By, Log Off), mute persistence, My Pictures through to the photo viewer/slideshow/video, and all
+three games. **Firefox, Safari, Edge and a real mobile device still have not been touched and
+still need Stephen's own pass** — same caveat as above, unchanged by this pass.
+
+Three real, reproducible bugs turned up, all the *same* root cause repeated in three places, and
+all fixed the same way:
+
+- **Minimizing a window did nothing.** `.xp-window { display: flex }` is an author-origin rule,
+  so per the CSS cascade it always wins over the browser's own default `[hidden] { display: none
+  }` regardless of specificity — `minimize()` (which only ever sets `el.hidden = true`) had zero
+  visible effect in a real browser. The "minimized" window stayed fully on screen and interactive;
+  only its taskbar button hinted anything had happened. Fixed with `.xp-window[hidden] { display:
+  none; }` in `src/styles/xp-overrides.css`. Restore, maximize, close and task-button sync were
+  re-verified working correctly afterward.
+- **Task Manager's three tabs rendered stacked on top of each other.** Same cause:
+  `.xp-tm [role="tabpanel"] { display: flex }` overrode `[hidden]` for all three panels
+  (Applications/Processes/Performance) at once, so switching tabs never actually hid the inactive
+  ones — all three lists and gauges rendered simultaneously in one window. Fixed with
+  `.xp-tm [role="tabpanel"][hidden] { display: none; }`.
+- **The Adobe Reader "cannot display PDF" fallback covered the real, successfully-loaded PDF.**
+  `.xp-reader-fallback { display: grid }` and `.xp-reader-page iframe { display: block }` both
+  overrode `[hidden]` the same way. Confirmed live: `iframe.hidden` was `false` and
+  `fallback.hidden` was `true` — the app's own load-detection logic worked correctly — but
+  `getComputedStyle` on the fallback still read `"grid"`, and its rect exactly overlapped the
+  iframe's, so the fallback message sat on top of the real PDF at all times in every browser that
+  can embed PDFs at all. Fixed the same way; also added `AdobeReader.test.js`, which this
+  component had none of.
+
+All three were invisible to the existing test suite because jsdom (used by every `*.test.js` file
+in this repo) never loads real stylesheets, so a test asserting `el.hidden === true` was, and
+remains, correct and green while the live-browser rendering was silently broken — this is exactly
+the same blind spot the CRT-overlay fix above already called out, just not yet generalized past
+that one element. `.xp-startmenu`, `.xp-balloon`, `.xp-tray-mute`, `.sol-*` timer elements, and
+`.xp-sysprops [role="tabpanel"]` were all individually checked against this same pattern (every
+selector any code toggles via `.hidden =`) and don't declare a competing `display`, so none of
+them are exposed to it.
+
+Two more things surfaced that are about this specific test tool, not the app, verified by reading
+the relevant source and by dispatching real, standards-compliant DOM events directly:
+
+- **Real keyboard input from this tool did not reliably reach a `keydown` listener scoped to a
+  specific focused window (`win.el`), for arrow keys specifically, in the Picture Viewer.**
+  `document.activeElement` correctly reported the focused stage element throughout, and a
+  programmatic `stage.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles:
+  true }))` advanced the photo exactly as the code intends — so `src/xp/apps/PictureViewer.js`'s
+  handler is correct. Escape (same listener, same element) worked via this tool's real key press
+  on one attempt and not on another with no code change in between, which points at this specific
+  automation pane's own input-routing rather than anything selective about which key. Left
+  unchanged; worth Stephen's own keyboard check during his manual pass.
+- **`getComputedStyle(...).opacity` on the CRT overlay froze at a stale mid-transition value
+  (`0.50354`) indefinitely** after the screen became interactive, across several seconds and a
+  tab-front, even though the *actual rendered screenshot* showed a completely clean desktop with
+  no scanline/vignette visible at all — i.e., the true compositor output already matched the
+  already-documented "settles to 0" behavior; only this tool's own style-introspection reflected a
+  frozen number. Consistent with, and an extra data point for, the already-documented
+  compositing-related quirks in this pane (see the WebGL2-probe note above and the
+  rAF-vs-`document.hidden` note below in Performance).
+
+Pinball's own render loop appears to be paced by the same pane-compositing behavior noted
+elsewhere in this file: the ball's position was frequently unchanged across single-digit-second
+gaps between otherwise-idle tool calls, even with the game unpaused. Launch (charge-and-release
+plunger), both flippers, nudge, and F3 pause/resume were each individually confirmed to respond
+correctly and instantly to input; a full three-ball game to natural game-over and a high-score
+entry were not reachable through this tool in reasonable time and were not exercised live — bumper
+and target scoring, the letter tracker, tilt, and the game-over/high-score dialog remain covered by
+`physics.test.js`, `table.test.js` and `Pinball.test.js` (all green) rather than by this pass's
+live-browser observation. Minesweeper (all three levels, flagging, chording setup, a real loss with
+the mine correctly revealed and the dead-face icon, F2) and Solitaire (draw, double-click-to-
+foundation scoring, a real drag-and-drop move, an illegal-drop rejection, undo, and a deck-back
+change) were both played through directly and matched expectations, including Solitaire's classic
+score-decays-over-time rule (confirmed intentional in `scoring.js`, not a bug).
+
+`npm test` was re-run after these fixes: 237 passed (232 before this pass, +5 for the new
+`AdobeReader.test.js`), 0 failed.
+
 ## Performance
 
 An agent pass (2026-09-09) measured bundle size for real, ran the real `lighthouse` CLI against a
@@ -310,6 +391,61 @@ call counter.
   body. The render loop genuinely pauses when the tab goes hidden and resumes when it's shown
   again.
 
+## Screenshots
+
+Still needed from Stephen — three screenshots, captured from his own machine (not generated),
+saved under `docs/screenshots/` using the filenames below. Once they exist, add the corresponding
+`![...](docs/screenshots/...)` line for each; nothing is linked yet so there's nothing broken in
+the meantime.
+
+- `docs/screenshots/room-overview.png` — the 3D bedroom, camera pulled back before clicking the PC
+- `docs/screenshots/desktop-ie.png` — focused on the CRT, Internet Explorer open showing the resume homepage
+- `docs/screenshots/game.png` — one game in play (Minesweeper, Solitaire or Pinball — whichever looks best)
+
+## How it was built
+
+The 3D room and the XP desktop are not two renderers pretending to stay in sync — they share
+exactly one DOM element. `src/room/Computer.js` wraps the real desktop root in a three.js
+`CSS3DObject` and positions it on the monitor inside the WebGL scene; `CSS3DRenderer` then
+transforms that live DOM subtree — the same element that fills the page in flat mode, holding a
+genuine `<iframe>` for Internet Explorer, Notepad's real `<textarea>`, Minesweeper's actual
+`<canvas>`-free DOM grid — with the same 3D perspective as the room around it, so the "screen" a
+visitor sees really is the OS, not a texture or a screen recording. The one seam is deliberate: once
+the camera finishes traveling to the screen, `elementFromPoint()` no longer hit-tests through the
+CSS3D layer, so `src/room/index.js` re-parents the desktop element into a plain, flatly-positioned
+layer (ordinary CSS `scale()`, not a 3D transform) for as long as it's focused, and hands it back to
+`CSS3DRenderer` the moment the visitor leaves — the desktop itself never reloads or re-renders
+across that handoff, it's the same live DOM the entire time.
+
+Each game's rules live in a small module that never touches the DOM, deliberately kept separate
+from however it happens to be drawn. Minesweeper's `engine.js` says as much in its own first line —
+"Minesweeper rules. Pure: no DOM, no timers." — and Pinball's `physics.js` matches it: "2D pinball
+physics helpers. Pure functions; collisions mutate the ball they are given." Solitaire's `engine.js`
+and `scoring.js`, and Pinball's `table.js`, follow the same shape: plain data in (a board array, a
+ball's x/y/vx/vy, a score number), plain data out, no `document`, no `canvas`, no `setTimeout`
+anywhere inside them. That separation is what makes `engine.test.js`, `physics.test.js`,
+`scoring.test.js` and `table.test.js` fast, deterministic unit tests instead of slow, flaky
+browser-driven ones — a test can hand Minesweeper's engine a fixed mine `layout` and assert the
+reveal cascade exactly, or step Pinball's physics forward by a fixed `dt` and assert a bounce, with
+no jsdom quirks and no timing races. Rendering is plain and framework-free too: Pinball paints to
+an ordinary `<canvas>` in `render.js`, Minesweeper and Solitaire build DOM nodes directly, and the
+only two runtime dependencies in `package.json` are `three` and `xp.css` — no React, Vue, or
+virtual DOM anywhere in the project.
+
+Every asset that would normally come straight out of a real Windows XP install was drawn or
+synthesized from scratch instead. The boot-screen flag says so in its own opening comment —
+`src/xp/icons/windowsFlag.js`: "Our own SVG recreation of a four-colour waving flag. Generated
+from a wave formula; no Microsoft file involved" — its four panes are plotted from a sine-based
+ripple formula, not traced from Microsoft's artwork. Every sound cue is synthesized the same way:
+`src/xp/sounds.js` opens with "Every cue is synthesized with WebAudio. No sample files, nothing
+recorded from Windows," and the startup chime, the error beep, Solitaire's card-flip click and
+Pinball's bumper thump are each just a short list of `[frequency, offset, duration]` tones
+generated at runtime, not decoded `.wav` files. The one Windows-adjacent asset that *is* a
+dependency rather than hand-drawn — XP.css's "Pixelated MS Sans Serif" webfont — is called out
+explicitly in the Licensing section below as an original recreation bundled inside an
+already-MIT-licensed package, not Microsoft's real font file, and was left as-is rather than
+redrawn, since the "make it ourselves" rule was already satisfied one dependency away.
+
 ## Roadmap
 
 1. Skeleton, resume pipeline, XP shell, IE/Explorer/Notepad (this plan) — done when the checklist passes
@@ -318,7 +454,7 @@ call counter.
 4. ~~Portfolio import from GBC, replacing the Wix site~~ done
 5. ~~Solitaire~~ done
 6. ~~Pinball~~ done
-7. Polish and performance pass
+7. ~~Polish and performance pass~~ done
 
 ## Licensing
 
