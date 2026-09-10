@@ -148,6 +148,111 @@ though WebGL2 genuinely works (confirmed by forcing `?mode=room`, which renders 
 startup/GPU-warmup quirk of the automated engine itself, not something real browsers do, so it was
 left alone rather than "fixed".
 
+## Performance
+
+An agent pass (2026-09-09) measured bundle size for real, ran the real `lighthouse` CLI against a
+real installed Chrome, and probed runtime behaviour through the Performance API in the same Claude
+Code browser tool used for the Browser notes above. As with that pass, be precise about what each
+number actually is.
+
+### Bundle (`npm run build`)
+
+| File | Role | Size | Gzip |
+|---|---|---|---|
+| `index-*.js` | entry — XP shell, flat desktop, mode detection | 94.89 kB | 30.05 kB |
+| `index-*.css` | entry styles (xp.css + overrides) | 279.79 kB | 45.58 kB |
+| `mount-*.js` | room chunk — three.js, OrbitControls, CSS3DRenderer; dynamically imported only once room mode actually mounts | 600.06 kB | 152.35 kB |
+| `mount-*.css` | room styles | 2.51 kB | 1.16 kB |
+| `Minesweeper-*.js` / `.css` | Minesweeper game chunk | 8.85 kB / 1.85 kB | 3.66 kB / 0.67 kB |
+| `Solitaire-*.js` / `.css` | Solitaire game chunk | 17.47 kB / 1.62 kB | 6.52 kB / 0.67 kB |
+| `Pinball-*.js` / `.css` | Pinball game chunk | 13.18 kB / 1.81 kB | 5.74 kB / 0.72 kB |
+| 6 `.woff`/`.woff2` files | xp.css + DOS VGA bitmap fonts | 70.56 kB combined | n/a (already-compressed formats; Vite doesn't gzip-report them) |
+
+`grep -c WebGLRenderer dist/assets/index-*.js` → **0**: the entry chunk carries no three.js. Every
+`WebGLRenderer` reference (6 of them) lives in `mount-*.js`, which `src/main.js` only `import()`s
+once room mode actually decides to mount (confirmed separately below: a Lighthouse run against
+`?mode=flat` never requests `mount-*.js`/`mount-*.css` at all). The Minesweeper/Solitaire/Pinball
+chunks also grep to 0.
+
+### Lighthouse (`npm run preview` + real Chrome)
+
+This machine has a real Google Chrome install
+(`C:\Program Files\Google\Chrome\Application\chrome.exe`), so this was run for real: `npx
+lighthouse` (v13.4.1, downloaded on demand) driving that Chrome headless, `--preset=desktop
+--only-categories=performance,accessibility,best-practices`, against `npm run preview`
+(`http://localhost:4174/XPcomputer/` — port 4173 was already taken). Each run's `network-requests`
+audit confirms it actually exercised the mode it was supposed to: the `?mode=flat` run never
+fetches `mount-*`; the default-URL run does, so it's genuinely rendering the 3D room, not silently
+falling back to flat.
+
+| Mode | Performance | Accessibility | Best Practices | Target |
+|---|---|---|---|---|
+| `?mode=flat` | **100** | **100** | 96 | Perf ≥ 90, A11y ≥ 90 |
+| default (room) | **98** | **94** | 96 | Perf ≥ 75, A11y ≥ 90 |
+
+Both modes clear the brief's targets. Two things worth being precise about:
+
+- **Accessibility did not flag contrast anywhere** — not the taskbar clock, not
+  `.xp-sm-sublabel`. So the brief's conditional fix (darken `.xp-sm-sublabel` to `#4a5d7c`) doesn't
+  apply, and it was **not applied** — there was nothing for it to fix. Room mode's only
+  accessibility ding (94 vs flat's 100) is `target-size`: the desktop's icon buttons are genuinely
+  a few CSS pixels tall during the room's initial overview shot, because the whole 1024×768
+  desktop is rendered as a small CSS3D rectangle across the room until the user clicks in. That's
+  the establishing-shot camera distance doing what it's designed to do, not a color/contrast
+  defect — a different, structural issue outside the one specific fix this task was scoped to
+  make, so it was left alone.
+- **Room mode's Performance score is real but GPU-dependent.** The 98 above is headless Chrome
+  using this machine's actual GPU for WebGL. The same run forced to pure software rendering
+  (`--disable-gpu --enable-unsafe-swiftshader`, no hardware acceleration at all) scored Performance
+  **60** instead (Total Blocking Time ballooned to ~38 s, Time to Interactive to ~44 s under a
+  software GL rasterizer) — accessibility and best-practices stayed at 94/96. Both numbers are
+  genuinely measured; which one a real visitor sees depends on whether their browser can
+  hardware-accelerate WebGL, which is exactly the situation the app's own "Low FX" toggle exists
+  for.
+- Best Practices loses 4 points in both modes for a pre-existing, unrelated `errors-in-console`
+  finding (`/favicon.ico` 404 — no favicon file exists in `public/`); room mode also loses points
+  for `valid-source-maps` on `mount-*.js` (sourcemaps are deliberately off — see the comment in
+  `vite.config.js`). Neither is in this task's scope.
+
+Full JSON/HTML reports were generated locally (`lighthouse-*.report.{json,html}`) while doing this
+and then discarded afterward — one-off measurement output, not project files, same treatment as
+`dist/`.
+
+### Runtime (Performance API, in room mode)
+
+**This is agent-measured Performance-API proxy data, not a DevTools Performance-panel
+recording** — this environment has no such panel to click through. Measured live against `npm run
+preview` in the same Claude Code browser pane as above, in room mode (`?mode=room`), via
+`PerformanceObserver({entryTypes:['longtask']})` and a patched `requestAnimationFrame` used as a
+call counter.
+
+- **Long tasks: none.** Zero `longtask` entries over 50 ms were recorded across the whole ~250 s
+  instrumented session, including while driving 9 real drag gestures and 2 scroll (zoom) gestures
+  on the room canvas — confirmed genuinely orbiting by comparing before/after screenshots (the
+  camera framing visibly changes between them).
+- **FPS: not reported, and here's exactly why.** While instrumenting this, the browser tool
+  reported the pane itself as hidden from the user's screen even though the page's own
+  `document.hidden` / `visibilityState` / `hasFocus()` all read visible/focused the whole time. A
+  bare, app-independent `requestAnimationFrame` callback (nothing to do with the room's own loop)
+  failed to fire even once over a clean 4-second window under that condition. That means
+  `requestAnimationFrame` delivery in this specific automation pane is gated on the pane actually
+  being composited to the user's screen, not on the page-visibility API the app itself checks — so
+  any FPS number computed by counting rAF calls here would measure this tool's own
+  pane-compositing cadence, not the app's real frame rate. Rather than print a number that isn't
+  really about the app, none is reported. **This is the one number in this section that genuinely
+  needs Stephen's own pass:** open DevTools → Performance, record ~10 s while orbiting in room
+  mode, and read the FPS meter / frame chart directly.
+- **Idle-on-hidden: confirmed.** `src/room/index.js` wires
+  `document.addEventListener('visibilitychange', onVisibility)` with `onVisibility = () =>
+  (document.hidden ? stop() : start())`, where `stop()` sets `running = false` and calls
+  `cancelAnimationFrame`, and `start()` sets `running = true` and runs one frame immediately
+  (synchronously). Verified live, independent of the compositor issue above, by monkey-patching
+  `cancelAnimationFrame` and stubbing `document.hidden` / `visibilityState`: forcing `hidden =
+  true` and dispatching `visibilitychange` triggered a real `cancelAnimationFrame()` call; forcing
+  it back to `false` and dispatching again triggered an immediate, synchronous re-run of the frame
+  body. The render loop genuinely pauses when the tab goes hidden and resumes when it's shown
+  again.
+
 ## Roadmap
 
 1. Skeleton, resume pipeline, XP shell, IE/Explorer/Notepad (this plan) — done when the checklist passes
