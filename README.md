@@ -56,7 +56,8 @@ Pushing to `main` runs tests, builds, and deploys to GitHub Pages
 ## Controls
 
 - Desktop: single click selects an icon, double click or Enter opens it; Alt+F4 closes the focused window; Escape closes dialogs.
-- Start > Run accepts `iexplore`, `explorer`, `notepad`, `winmine`, `sol`, `pinball`.
+- Right-click the desktop for Arrange Icons By Name, Refresh and Properties (opens Display Properties' wallpaper picker); right-click the taskbar for Task Manager and Properties. Escape closes an open menu; arrow keys move between its items, wrapping at each end.
+- Start > Run accepts `iexplore`, `winmine`, `sol`, `pinball`, `notepad`, `explorer`, `sysprops`, `help`, `controlpanel`, `taskmgr`, `display`.
 - The tray speaker toggles sound (remembered between visits).
 - 3D room: drag to orbit, wheel to zoom, click the PC to sit down at it, Escape or "Back to room" to stand up.
 - "Low FX" (bottom right) turns bloom off and caps resolution for slower machines; the choice is remembered.
@@ -75,6 +76,8 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 - [ ] Homepage shows every resume section and no phone number
 - [ ] PDF opens in the Adobe Reader window; Save a Copy downloads it; fallback shows when PDFs cannot embed
 - [ ] Every desktop icon, Start menu item, All Programs entry and Run command does something sensible
+- [ ] Right-click desktop → Properties opens Display Properties, wallpaper picker previews and persists across reload
+- [ ] Right-click taskbar → Task Manager lists open windows, End Task closes them, Processes tab shows fake system processes
 - [ ] Windows drag, resize, minimize, maximize, close; task buttons stay in sync
 - [ ] Explorer: drives, folders, Back/Forward/Up, Views, task pane links, right-click Properties
 - [ ] Notepad edit → close asks to save
@@ -310,7 +313,7 @@ text.
 | `?mode=flat` | **100** | **100** | 96 | Perf ≥ 90, A11y ≥ 90 |
 | default (room) | **99** | **94** | 96 | Perf ≥ 75, A11y ≥ 90 |
 
-Both modes clear the brief's targets. Two things worth being precise about:
+Both modes clear the brief's targets. A few things worth being precise about:
 
 - **Accessibility did not flag contrast anywhere** — not the taskbar clock, not
   `.xp-sm-sublabel`. So the brief's conditional fix (darken `.xp-sm-sublabel` to `#4a5d7c`) doesn't
@@ -321,6 +324,18 @@ Both modes clear the brief's targets. Two things worth being precise about:
   until the user clicks in. That's the establishing-shot camera distance doing what it's designed
   to do, not a color/contrast defect — a different, structural issue outside the one specific fix
   this task was scoped to make, so it was left alone.
+- **The Accessibility score reflects only the at-load desktop state, not this phase's own ARIA
+  work.** Both Lighthouse runs audited the desktop exactly as it first paints: the Start menu was
+  closed, neither the desktop nor the taskbar context menu was open, and neither Task Manager nor
+  Display Properties existed on screen yet (all four are opened by a click or right-click, none by
+  page load). Reading the saved JSON directly confirms this axe never had anything of the kind to
+  check: `aria-required-children`, `aria-allowed-role` and `aria-required-attr` are all
+  `notApplicable` in every run. So the `role="menu"`/`role="menuitem"` semantics and Escape/arrow-key
+  handling added this phase to the Start menu and the two popup context menus, the taskbar's
+  `aria-haspopup`/`aria-expanded` on the Start button, and the desktop icons' `aria-label` are all
+  real but **unaudited** by the 100/94 numbers above — not failing, simply never exercised by this
+  measurement. Confirming that work would need a Lighthouse run captured with one of those surfaces
+  open, which this pass did not do.
 - **Room mode's Performance score is real but GPU-dependent.** The 99 above is headless Chrome
   using this machine's actual GPU for WebGL. The same page forced to pure software rendering
   (`--disable-gpu --enable-unsafe-swiftshader`, no hardware acceleration at all) scored Performance
@@ -340,10 +355,12 @@ Both modes clear the brief's targets. Two things worth being precise about:
   their browser can hardware-accelerate WebGL — exactly the situation the app's own "Low FX"
   toggle exists for.
 - Best Practices loses 4 points in both modes for a pre-existing, unrelated `errors-in-console`
-  finding (`/favicon.ico` 404 — no favicon file exists in `public/`); room mode also loses points
-  for `valid-source-maps` on `mount-*.js` (sourcemaps are deliberately off — see the comment in
-  `vite.config.js`). Neither is in this task's scope. Both confirmed unchanged on every fix pass
-  since.
+  finding (`/favicon.ico` 404 — no favicon file existed in `public/` at the time of this measurement);
+  room mode also loses points for `valid-source-maps` on `mount-*.js` (sourcemaps are deliberately
+  off — see the comment in `vite.config.js`). Neither was in that task's scope. The favicon gap has
+  since been closed (`public/favicon.svg`, linked from `index.html`) in the final Phase 6 fix wave,
+  so a fresh Lighthouse run should recover those 4 points in both modes — that re-run has not been
+  done, so the 96/96 above is left as originally measured rather than guessed at.
 
 Full `--output=json` reports for all three runs from this latest pass are kept permanently —
 unlike every earlier pass, which read the numbers out of the JSON and then deleted it — at:
