@@ -223,6 +223,7 @@
 /* ---- Task Manager ---- */
 .xp-tm { display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 8px; font-size: 11px; }
 .xp-tm [role="tabpanel"] { flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 8px; }
+.xp-tm [role="tabpanel"][hidden] { display: none; }
 .xp-tm-list { flex: 1; overflow: auto; background: #fff; }
 .xp-tm table { width: 100%; border-collapse: collapse; }
 .xp-tm th { text-align: left; font-weight: normal; padding: 2px 6px; background: #ece9d8; border-right: 1px solid #aca899; border-bottom: 1px solid #aca899; position: sticky; top: 0; }
