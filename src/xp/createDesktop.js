@@ -16,13 +16,13 @@ import { registerExplorer } from './apps/Explorer.js';
 import { registerNotepad } from './apps/Notepad.js';
 import { registerSystemProperties } from './apps/SystemProperties.js';
 import { registerMisc } from './apps/misc.js';
+import { registerDisplayProperties, applyWallpaper } from './apps/DisplayProperties.js';
 import { registerPictureViewer } from './apps/PictureViewer.js';
-import { registerMinesweeper } from './games/minesweeper/Minesweeper.js';
-import { registerSolitaire } from './games/solitaire/Solitaire.js';
-import { registerPinball } from './games/pinball/Pinball.js';
+import { registerTaskManager } from './apps/TaskManager.js';
+import { registerGames } from './games/index.js';
 import { buildFileSystem, PATHS } from '../data/filesystem.js';
 
-const RUNNABLE = ['iexplore', 'winmine', 'sol', 'pinball', 'notepad', 'explorer', 'sysprops', 'help', 'controlpanel'];
+const RUNNABLE = ['iexplore', 'winmine', 'sol', 'pinball', 'notepad', 'explorer', 'sysprops', 'help', 'controlpanel', 'taskmgr', 'display'];
 const NOT_WIN32 = ['cmd', 'calc', 'regedit', 'msconfig'];
 
 function defaultOpenExternal(url) {
@@ -38,7 +38,6 @@ export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = 
     <div class="xp-taskbar-root"></div>
     <div class="xp-startmenu-root"></div>
     <div class="xp-crt"></div>`;
-  rootEl.style.setProperty('--xp-wallpaper', `url("${wallpaperUrl}")`);
   const desktopEl = rootEl.querySelector('.xp-desktop');
 
   const listeners = new Map();
@@ -59,7 +58,8 @@ export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = 
     const s = rect.width / DESKTOP_WIDTH || 1;
     return { x: (clientX - rect.left) / s, y: (clientY - rect.top) / s };
   };
-  const ctx = { wm, dialogs, menus, sounds, resume, portfolio, fs, pdfHref, mediaBase, repoUrl, storage, openExternal, screenEl: rootEl, toDesktopPoint, reducedMotion };
+  const ctx = { wm, dialogs, menus, sounds, resume, portfolio, fs, pdfHref, mediaBase, repoUrl, storage, openExternal, screenEl: rootEl, toDesktopPoint, reducedMotion, desktopEl, wallpaperUrl };
+  applyWallpaper(desktopEl, storage.get('xpcomputer.wallpaper') ?? 'hills', wallpaperUrl);
   const registry = createRegistry(ctx);
   ctx.registry = registry;
   registerInternetExplorer(registry);
@@ -68,10 +68,11 @@ export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = 
   registerNotepad(registry);
   registerSystemProperties(registry);
   registerMisc(registry);
+  registerDisplayProperties(registry);
   registerPictureViewer(registry);
-  registerMinesweeper(registry);
-  registerSolitaire(registry);
-  registerPinball(registry);
+  registerTaskManager(registry);
+  registry.register('run', { name: 'Run', icon: 'run', launch: () => dialogs.run({ onRun: runCommand }) });
+  registerGames(registry);
   const launch = (id, payload) => () => registry.launch(id, payload);
 
   const icons = createDesktopIcons(rootEl.querySelector('.xp-icons-layer'), [
@@ -167,6 +168,23 @@ export function createDesktop(rootEl, { resume, portfolio, pdfHref, mediaBase = 
   }
 
   desktopEl.addEventListener('pointerdown', (e) => { if (e.target === desktopEl || e.target.classList.contains('xp-icons-layer')) { icons.clear(); wm.blur(); } });
+  desktopEl.addEventListener('contextmenu', (e) => {
+    if (e.target.closest('.xp-window, .xp-desktop-icon')) return;
+    e.preventDefault();
+    const { x, y } = toDesktopPoint(e.clientX, e.clientY);
+    menus.openAt(x, y, [
+      { label: 'Arrange Icons By Name', action: () => sounds.play('click') },
+      { label: 'Refresh', action: () => sounds.play('click') },
+      { separator: true },
+      { label: 'Properties', action: launch('display') },
+    ]);
+  });
+  rootEl.querySelector('.xp-taskbar-root').addEventListener('contextmenu', (e) => {
+    if (e.target.closest('.xp-task, .xp-start')) return;
+    e.preventDefault();
+    const { x, y } = toDesktopPoint(e.clientX, e.clientY);
+    menus.openAt(x, y - 60, [{ label: 'Task Manager', action: launch('taskmgr') }, { separator: true }, { label: 'Properties', action: launch('display') }]);
+  });
   const rootListenerAbort = new AbortController();
   rootEl.addEventListener('keydown', (e) => { if (e.altKey && e.key === 'F4') { e.preventDefault(); wm.focused?.close(); } }, { signal: rootListenerAbort.signal });
   rootEl.addEventListener('pointerdown', () => sounds.unlock(), { once: true, signal: rootListenerAbort.signal });

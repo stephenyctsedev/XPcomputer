@@ -13,3 +13,18 @@ export function fitDistance({ width, height, fovDeg, aspect, margin = 1.04 }) {
 export function containScale({ boxWidth, boxHeight, contentWidth, contentHeight }) {
   return Math.min(boxWidth / contentWidth, boxHeight / contentHeight);
 }
+
+/**
+ * Pick the room's render size: the container's own box, falling back to the window when the
+ * container hasn't been laid out yet. Both can read 0 for one synchronous tick right at mount
+ * (observed live: some embedding contexts -- e.g. a preview surface still negotiating its own
+ * viewport -- report window.innerWidth/innerHeight as 0 until their first 'resize' event fires).
+ * Returns null when neither source has a usable size yet, so callers can skip sizing the
+ * renderer rather than feeding it 0 (which allocates zero-sized WebGL render targets and spams
+ * GL_INVALID_FRAMEBUFFER_OPERATION on every frame) or NaN (0/0) into camera.aspect.
+ */
+export function resolveRoomSize({ clientWidth, clientHeight, innerWidth, innerHeight }) {
+  const w = clientWidth || innerWidth;
+  const h = clientHeight || innerHeight;
+  return w > 0 && h > 0 ? { w, h } : null;
+}

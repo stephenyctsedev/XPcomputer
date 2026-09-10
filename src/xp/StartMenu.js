@@ -2,13 +2,14 @@ import { iconEl } from './icons/index.js';
 
 export function createStartMenu(rootEl, { userName, left, right, allPrograms, onLogOff, onTurnOff, sounds }) {
   rootEl.classList.add('xp-startmenu');
+  rootEl.setAttribute('role', 'menu');
   rootEl.hidden = true;
   rootEl.innerHTML = `
     <div class="xp-sm-header"><span class="xp-sm-avatar"></span><span class="xp-sm-user"></span></div>
     <div class="xp-sm-columns"><div class="xp-sm-left"></div><div class="xp-sm-right"></div></div>
     <div class="xp-sm-footer">
-      <button type="button" class="xp-sm-footer-btn" data-cmd="logoff"><span class="xp-sm-footer-ico"></span>Log Off</button>
-      <button type="button" class="xp-sm-footer-btn" data-cmd="turnoff"><span class="xp-sm-footer-ico"></span>Turn Off Computer</button>
+      <button type="button" class="xp-sm-footer-btn" role="menuitem" data-cmd="logoff"><span class="xp-sm-footer-ico"></span>Log Off</button>
+      <button type="button" class="xp-sm-footer-btn" role="menuitem" data-cmd="turnoff"><span class="xp-sm-footer-ico"></span>Turn Off Computer</button>
     </div>
     <div class="xp-sm-flyouts"></div>`;
   rootEl.querySelector('.xp-sm-avatar').append(iconEl('user', 40));
@@ -25,6 +26,7 @@ export function createStartMenu(rootEl, { userName, left, right, allPrograms, on
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'xp-sm-item';
+    b.setAttribute('role', 'menuitem');
     b.append(iconEl(item.icon, iconSize));
     const text = document.createElement('span');
     text.className = 'xp-sm-text';
@@ -80,11 +82,21 @@ export function createStartMenu(rootEl, { userName, left, right, allPrograms, on
   rootEl.querySelector('.xp-sm-right').addEventListener('mouseenter', () => clearFlyouts(0));
 
   function onDocumentDown(e) { if (isOpen && !rootEl.contains(e.target) && !e.target.closest('.xp-start')) close(); }
-  function onKey(e) { if (e.key === 'Escape') close(); }
+  const focusables = () => [...rootEl.querySelectorAll('.xp-sm-item, .xp-sm-footer-btn')].filter((b) => !b.closest('.xp-sm-flyout'));
+  function onKey(e) {
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    e.preventDefault();
+    const items = focusables();
+    const index = items.indexOf(document.activeElement);
+    const next = e.key === 'ArrowDown' ? (index + 1) % items.length : (index - 1 + items.length) % items.length;
+    items[next]?.focus({ preventScroll: true });
+  }
   function open() {
     if (isOpen) return;
     isOpen = true;
     rootEl.hidden = false;
+    focusables()[0]?.focus({ preventScroll: true });
     sounds?.play('menu');
     document.addEventListener('pointerdown', onDocumentDown, true);
     document.addEventListener('keydown', onKey);
