@@ -9,6 +9,7 @@ export function createDesktopIcons(container, defs) {
     b.type = 'button';
     b.className = `xp-desktop-icon${def.corner ? ' xp-desktop-icon-corner' : ''}`;
     b.dataset.id = def.id;
+    b.setAttribute('aria-label', def.label);
     b.append(iconEl(def.icon, 32));
     const label = document.createElement('span');
     label.className = 'xp-desktop-icon-label';

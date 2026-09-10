@@ -6,6 +6,7 @@
 
 /* ---- Windows ---- */
 .xp-window { position: absolute; display: flex; flex-direction: column; box-sizing: border-box; }
+.xp-window[hidden] { display: none; }
 .xp-window .title-bar { cursor: default; user-select: none; -webkit-user-select: none; }
 .xp-window .title-bar-text { display: flex; align-items: center; gap: 5px; overflow: hidden; white-space: nowrap; }
 .xp-window .xp-window-body { flex: 1; min-height: 0; margin: 0; padding: 0; display: flex; flex-direction: column; overflow: hidden; background: #ece9d8; }
@@ -58,6 +59,7 @@
 .xp-reader-hint { margin-left: auto; color: #666; }
 .xp-reader-page { flex: 1; min-height: 0; background: #7a7a7a; position: relative; }
 .xp-reader-page iframe { width: 100%; height: 100%; border: 0; display: block; }
+.xp-reader-page iframe[hidden], .xp-reader-fallback[hidden] { display: none; }
 .xp-reader-fallback { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; background: #ece9d8; font-size: 12px; }
 
 /* ---- Explorer ---- */
@@ -210,3 +212,29 @@
 .xp-windows > * { pointer-events: auto; }
 .xp-crt { position: absolute; inset: 0; z-index: 300000; pointer-events: none; background: repeating-linear-gradient(rgba(0,0,0,0) 0 2px, rgba(0,0,0,.22) 2px 3px), radial-gradient(ellipse at center, rgba(0,0,0,.05) 50%, rgba(0,0,0,.6) 100%); transition: opacity .4s; }
 .xp-crt[hidden] { display: block !important; opacity: 0; }
+
+/* ---- Display Properties ---- */
+.xp-display { display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 10px; font-size: 11px; }
+.xp-display [role="tabpanel"] { flex: 1; padding: 12px; }
+.xp-display-monitor { width: 200px; margin: 0 auto 12px; }
+.xp-display-preview { height: 140px; border: 8px solid #d7d3c8; border-radius: 6px; box-shadow: inset 0 0 0 2px #333; }
+.xp-display-stand { display: block; width: 60px; height: 10px; margin: 0 auto; background: #bdb8ac; border-radius: 0 0 4px 4px; }
+.xp-display-note { color: #666; margin: 12px 0 0; }
+.xp-display-buttons { justify-content: flex-end; padding-top: 10px; }
+
+/* ---- Task Manager ---- */
+.xp-tm { display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 8px; font-size: 11px; }
+.xp-tm [role="tabpanel"] { flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 8px; }
+.xp-tm [role="tabpanel"][hidden] { display: none; }
+.xp-tm-list { flex: 1; overflow: auto; background: #fff; }
+.xp-tm table { width: 100%; border-collapse: collapse; }
+.xp-tm th { text-align: left; font-weight: normal; padding: 2px 6px; background: #ece9d8; border-right: 1px solid #aca899; border-bottom: 1px solid #aca899; position: sticky; top: 0; }
+.xp-tm td { padding: 2px 6px; white-space: nowrap; }
+.xp-tm tr.selected td { background: #316ac5; color: #fff; }
+.xp-tm-buttons { justify-content: flex-end; padding-top: 8px; }
+.xp-tm-perf { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.xp-tm-gauge { height: 70px; display: grid; place-items: center; background: #000; color: #0f0; font: bold 18px "Courier New", monospace; border: 1px solid #555; }
+
+/* ---- Focus visibility ---- */
+.xp-screen :is(.xp-sm-item, .xp-sm-footer-btn, .xp-menu-item, .xp-task, .xp-tb, .xp-item, .ms-cell, .sol-deck-choice):focus-visible { outline: 1px dotted #000; outline-offset: -2px; }
+.xp-screen :is(.xp-sm-item, .xp-sm-footer-btn, .xp-task):focus-visible { outline-color: #fff; }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { fitDistance, containScale } from './cameraFit.js';
+import { fitDistance, containScale, resolveRoomSize } from './cameraFit.js';
 
 describe('fitDistance', () => {
   const screen = { width: 0.32, height: 0.24, fovDeg: 50 };
@@ -26,5 +26,25 @@ describe('containScale', () => {
   });
   it('scales up to fill a box larger than the content', () => {
     expect(containScale({ boxWidth: 2048, boxHeight: 1536, contentWidth: 1024, contentHeight: 768 })).toBeCloseTo(2, 5);
+  });
+});
+
+describe('resolveRoomSize', () => {
+  it('prefers the container size when it has been laid out', () => {
+    expect(resolveRoomSize({ clientWidth: 800, clientHeight: 600, innerWidth: 1280, innerHeight: 720 })).toEqual({ w: 800, h: 600 });
+  });
+  it('falls back to the window when the container has no size yet', () => {
+    expect(resolveRoomSize({ clientWidth: 0, clientHeight: 0, innerWidth: 1280, innerHeight: 720 })).toEqual({ w: 1280, h: 720 });
+  });
+  // Regression: some embedding contexts report window.innerWidth/innerHeight as 0 too for one
+  // synchronous tick right at mount (seen live via a preview surface still negotiating its own
+  // viewport). Feeding that straight into camera.aspect (NaN) and the renderer/composer
+  // (zero-sized WebGL render targets -> GL_INVALID_FRAMEBUFFER_OPERATION every frame) was the bug;
+  // resolveRoomSize must report "not ready" instead of 0 so callers skip sizing until a real resize.
+  it('reports not ready when both the container and the window are still 0x0', () => {
+    expect(resolveRoomSize({ clientWidth: 0, clientHeight: 0, innerWidth: 0, innerHeight: 0 })).toBeNull();
+  });
+  it('reports not ready when only the height side is still 0', () => {
+    expect(resolveRoomSize({ clientWidth: 800, clientHeight: 0, innerWidth: 0, innerHeight: 0 })).toBeNull();
   });
 });

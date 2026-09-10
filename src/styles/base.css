@@ -1,4 +1,10 @@
 html, body { margin: 0; height: 100%; background: #000; color: #ddd; font-family: Tahoma, Verdana, sans-serif; }
 #app { position: fixed; inset: 0; overflow: hidden; }
-.flat-stage { position: absolute; inset: 0; display: grid; place-items: center; background: #000; }
+/* grid-template-columns/rows: 100% makes the single implicit track match the container's own
+   size. Without it, an auto-sized track grows to the item's content size (the 1024x768 screen)
+   instead -- harmless when the viewport is bigger than 1024x768, but on any narrower viewport
+   (every phone in portrait -- confirmed live at 375x812) the track overflows and place-items:
+   center centers the screen within that oversized track rather than within the actual viewport,
+   landing most of the scaled screen off to one side instead of centered. */
+.flat-stage { position: absolute; inset: 0; display: grid; grid-template-columns: 100%; grid-template-rows: 100%; place-items: center; background: #000; }
 .flat-notice { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: 12px; color: #777; }

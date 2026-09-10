@@ -41,4 +41,44 @@ describe('menus', () => {
     items[1].click();
     expect(screen.querySelector('.xp-menu .xp-menu-label').textContent).toBe('About');
   });
+
+  it('focuses the first item on open and closes on Escape', () => {
+    menus.open(document.querySelector('#anchor'), [{ label: 'New' }, { label: 'Open' }]);
+    const items = screen.querySelectorAll('.xp-menu-item');
+    expect(document.activeElement).toBe(items[0]);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(screen.querySelector('.xp-menu')).toBeNull();
+    expect(menus.isOpen).toBe(false);
+  });
+
+  it('moves focus between items with ArrowDown/ArrowUp, wrapping at each end', () => {
+    menus.open(document.querySelector('#anchor'), [{ label: 'A' }, { label: 'B' }, { label: 'C' }]);
+    const items = screen.querySelectorAll('.xp-menu-item');
+    expect(document.activeElement).toBe(items[0]);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(document.activeElement).toBe(items[1]);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(document.activeElement).toBe(items[2]);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(document.activeElement).toBe(items[0]);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(document.activeElement).toBe(items[2]);
+  });
+
+  it('skips disabled items when focusing initially and when navigating', () => {
+    menus.open(document.querySelector('#anchor'), [
+      { label: 'A', disabled: true },
+      { label: 'B' },
+      { label: 'C', disabled: true },
+      { label: 'D' },
+    ]);
+    const items = screen.querySelectorAll('.xp-menu-item');
+    expect(document.activeElement).toBe(items[1]);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(document.activeElement).toBe(items[3]);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(document.activeElement).toBe(items[1]);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(document.activeElement).toBe(items[3]);
+  });
 });
