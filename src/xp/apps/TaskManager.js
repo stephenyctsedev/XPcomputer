@@ -56,6 +56,7 @@ export function openTaskManager(ctx) {
     content.querySelector('.xp-tm-status-procs').textContent = `Processes: ${count}`;
     content.querySelector('.xp-tm-count').textContent = String(count);
     if (selectedApp) select(appsBody, appsBody.querySelector(`[data-key="${selectedApp}"]`), (k) => { selectedApp = k; });
+    if (selectedProc) select(procsBody, procsBody.querySelector(`[data-key="${selectedProc}"]`), (k) => { selectedProc = k; });
   }
   appsBody.addEventListener('click', (e) => select(appsBody, e.target.closest('tr'), (k) => { selectedApp = k; }));
   procsBody.addEventListener('click', (e) => select(procsBody, e.target.closest('tr'), (k) => { selectedProc = k; }));

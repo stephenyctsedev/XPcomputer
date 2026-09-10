@@ -35,4 +35,15 @@ describe('Task Manager', () => {
     expect(tm.el.querySelector('.xp-tm-cpu').textContent).toMatch(/\d+%/);
     vi.useRealTimers();
   });
+  it('resyncs process selection when unrelated window opens', () => {
+    const notepad = ctx.wm.open({ appId: 'notepad', title: 'todo.txt - Notepad' });
+    const tm = openTaskManager(ctx);
+    tm.el.querySelectorAll('[role="tab"]')[1].click();
+    const procRows = () => [...tm.el.querySelectorAll('.xp-tm-procs tbody tr')];
+    const notepadRow = procRows().find((r) => r.children[0].textContent === 'notepad.exe');
+    notepadRow.click();
+    expect(notepadRow.classList.contains('selected')).toBe(true);
+    ctx.wm.open({ appId: 'iexplore', title: 'Homepage - Internet Explorer' });
+    expect(notepadRow.classList.contains('selected')).toBe(true);
+  });
 });
