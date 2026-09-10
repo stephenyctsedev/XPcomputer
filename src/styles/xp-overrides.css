@@ -231,3 +231,7 @@
 .xp-tm-buttons { justify-content: flex-end; padding-top: 8px; }
 .xp-tm-perf { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
 .xp-tm-gauge { height: 70px; display: grid; place-items: center; background: #000; color: #0f0; font: bold 18px "Courier New", monospace; border: 1px solid #555; }
+
+/* ---- Focus visibility ---- */
+.xp-screen :is(.xp-sm-item, .xp-sm-footer-btn, .xp-menu-item, .xp-task, .xp-tb, .xp-item, .ms-cell, .sol-deck-choice):focus-visible { outline: 1px dotted #000; outline-offset: -2px; }
+.xp-screen :is(.xp-sm-item, .xp-sm-footer-btn, .xp-task):focus-visible { outline-color: #fff; }

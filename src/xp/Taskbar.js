@@ -10,9 +10,9 @@ export function formatClock(date) {
 export function createTaskbar(rootEl, { wm, sounds, onStart, now = () => new Date() }) {
   rootEl.classList.add('xp-taskbar');
   rootEl.innerHTML = `
-    <button class="xp-start" type="button"><span class="xp-start-flag"></span>start</button>
+    <button class="xp-start" type="button" aria-haspopup="menu"><span class="xp-start-flag"></span>start</button>
     <div class="xp-tasks"></div>
-    <div class="xp-tray"><button class="xp-tray-mute" type="button" title="Volume"></button><span class="xp-clock"></span></div>
+    <div class="xp-tray"><button class="xp-tray-mute" type="button" title="Volume" aria-label="Toggle sound"></button><span class="xp-clock"></span></div>
     <div class="xp-balloon" hidden><button class="xp-balloon-close" type="button" aria-label="Close">×</button><div class="xp-balloon-title"></div><div class="xp-balloon-text"></div></div>`;
   rootEl.querySelector('.xp-start-flag').append(flagEl(18));
   const start = rootEl.querySelector('.xp-start');
@@ -77,5 +77,5 @@ export function createTaskbar(rootEl, { wm, sounds, onStart, now = () => new Dat
     balloon.onclick = (e) => { hideBalloon(); if (!e.target.closest('.xp-balloon-close')) onClick?.(); };
   }
 
-  return { el: rootEl, tick, showBalloon, hideBalloon, setStartActive: (on) => start.classList.toggle('active', on), destroy: () => { clearInterval(clockTimer); clearTimeout(balloonTimer); unsubscribers.forEach(fn => fn()); } };
+  return { el: rootEl, tick, showBalloon, hideBalloon, setStartActive: (on) => { start.classList.toggle('active', on); start.setAttribute('aria-expanded', String(on)); }, destroy: () => { clearInterval(clockTimer); clearTimeout(balloonTimer); unsubscribers.forEach(fn => fn()); } };
 }

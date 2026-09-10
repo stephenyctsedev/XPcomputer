@@ -22,6 +22,7 @@ export function createMenus(screenEl, { sounds } = {}) {
   function build(items) {
     const menu = document.createElement('div');
     menu.className = 'xp-menu';
+    menu.setAttribute('role', 'menu');
     for (const item of items) {
       if (item.separator) {
         const sep = document.createElement('div');
@@ -32,6 +33,7 @@ export function createMenus(screenEl, { sounds } = {}) {
       const row = document.createElement('button');
       row.className = 'xp-menu-item';
       row.type = 'button';
+      row.setAttribute('role', 'menuitem');
       row.disabled = Boolean(item.disabled);
       row.innerHTML = '<span class="xp-menu-check"></span><span class="xp-menu-label"></span><span class="xp-menu-shortcut"></span>';
       row.querySelector('.xp-menu-check').textContent = item.checked ? '✓' : '';
