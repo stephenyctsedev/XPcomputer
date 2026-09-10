@@ -6,6 +6,7 @@
 
 /* ---- Windows ---- */
 .xp-window { position: absolute; display: flex; flex-direction: column; box-sizing: border-box; }
+.xp-window[hidden] { display: none; }
 .xp-window .title-bar { cursor: default; user-select: none; -webkit-user-select: none; }
 .xp-window .title-bar-text { display: flex; align-items: center; gap: 5px; overflow: hidden; white-space: nowrap; }
 .xp-window .xp-window-body { flex: 1; min-height: 0; margin: 0; padding: 0; display: flex; flex-direction: column; overflow: hidden; background: #ece9d8; }
