@@ -99,6 +99,55 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 - [ ] The desktop My Pictures icon, the Start menu entry and the homepage Projects link all reach the folder
 - [ ] Pinball: launch, flippers, bumpers, targets/bank, letters/extra ball, tilt, three-ball game over with high score, pause on minimize
 
+## Browser notes
+
+An agent pass (2026-09-09) ran an automated smoke test against `npm run build && npm run
+preview`. Be precise about what that does and doesn't cover: the only browser available to it was
+the Claude Code in-app browser tool, a single Chromium-based automated engine (its user agent
+reports `Chrome/152` inside a `Claude/…` wrapper) — not a real installed copy of Chrome, Edge,
+Firefox or Safari, and not a real phone. **Firefox, Safari, Edge and a real mobile device have not
+been tested and still need Stephen's own manual pass before shipping** — nothing below should be
+read as covering them.
+
+What the agent pass actually exercised in that one engine, all with a clean console (no errors) at
+each step: room-mode load, forcing `?mode=room` and clicking the PC through boot to a working
+desktop, opening Internet Explorer and the resume PDF path, opening and playing Minesweeper,
+Escape back to the room, `?mode=flat`, and mobile-viewport emulation at 375x812. It also
+specifically checked the CRT overlay: only one `.xp-crt[hidden]` rule exists in the CSS and nothing
+later resets `display`; live in the browser, computed `opacity` does settle to `0` once the screen
+is interactive (a transition mid-flight can make a snapshot look stuck at `1` for a moment — that
+self-corrects and is not a bug).
+
+Two real, reproducible issues turned up and were fixed:
+
+- **Mobile/narrow-viewport flat desktop was badly mis-centered.** `.flat-stage` used
+  `display: grid; place-items: center` to center the 1024x768 desktop inside the viewport. CSS
+  grid's implicit auto-sized track grows to fit the *item's* content size when the item is bigger
+  than the container, so on any viewport narrower than 1024px (i.e. every phone in portrait) the
+  track itself overflowed and the desktop was centered inside that oversized track instead of the
+  real viewport — landing most of it off-screen to one side rather than centered. Confirmed live at
+  375x812 (rect was `x:324.5, w:375`, mostly beyond the right edge) and fixed by pinning the track
+  to the container's own size (`grid-template-columns: 100%; grid-template-rows: 100%` in
+  `src/styles/base.css`); re-verified centered (`x:0, w:375`) at 375x812 and correct at a
+  height-constrained 1400x600 too. This is plain CSS grid behavior, not engine-specific, so it
+  would reproduce in any standards-compliant browser — this wasn't a quirk of the test tool.
+- **Zero-size WebGL render targets on every room-mode mount.** `createRoom()`'s initial `resize()`
+  computed `container.clientWidth || window.innerWidth` for its fallback, but in this environment
+  `window.innerWidth`/`innerHeight` can themselves read `0` for one synchronous tick right at mount
+  (seen live, plus general robustness against any embedding context where that's true, e.g. a
+  hidden iframe). That fed straight into `effects.setSize(0, 0)`, spamming
+  `GL_INVALID_FRAMEBUFFER_OPERATION: Attachment has zero size` on every frame and setting
+  `camera.aspect` to `NaN`, until a later real resize corrected it. Fixed with a small
+  `resolveRoomSize()` guard in `src/room/cameraFit.js` (used from `src/room/index.js`) that skips
+  sizing when neither source has a usable size yet; covered by unit tests in `cameraFit.test.js`.
+  Confirmed live: a fresh tab loading `?mode=room` now logs zero framebuffer warnings.
+
+Also environment-only and *not* an app bug, noted for whoever runs this again: on a cold first
+navigation, this specific browser tool's own `detectEnv()` WebGL2 probe can read `false` even
+though WebGL2 genuinely works (confirmed by forcing `?mode=room`, which renders correctly) — a
+startup/GPU-warmup quirk of the automated engine itself, not something real browsers do, so it was
+left alone rather than "fixed".
+
 ## Roadmap
 
 1. Skeleton, resume pipeline, XP shell, IE/Explorer/Notepad (this plan) — done when the checklist passes

@@ -7,7 +7,7 @@ import { createCameraRig } from './CameraRig.js';
 import { createEffects } from './Effects.js';
 import { createInteraction } from './Interaction.js';
 import { makeRoomTextures } from './textures.js';
-import { containScale } from './cameraFit.js';
+import { containScale, resolveRoomSize } from './cameraFit.js';
 
 /** Dispose every geometry/material (and any map/emissiveMap texture they hold) under `root`. */
 function disposeSceneResources(root) {
@@ -101,8 +101,12 @@ export function createRoom(container, screenElement, { reducedMotion = false, lo
   });
 
   const resize = () => {
-    const w = container.clientWidth || window.innerWidth;
-    const h = container.clientHeight || window.innerHeight;
+    const size = resolveRoomSize({
+      clientWidth: container.clientWidth, clientHeight: container.clientHeight,
+      innerWidth: window.innerWidth, innerHeight: window.innerHeight,
+    });
+    if (!size) return; // not laid out yet -- the resize listener below re-runs once real numbers are available
+    const { w, h } = size;
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     effects.setSize(w, h);
