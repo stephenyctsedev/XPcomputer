@@ -179,11 +179,20 @@ chunks also grep to 0.
 This machine has a real Google Chrome install
 (`C:\Program Files\Google\Chrome\Application\chrome.exe`), so this was run for real: `npx
 lighthouse` (v13.4.1, downloaded on demand) driving that Chrome headless, `--preset=desktop
---only-categories=performance,accessibility,best-practices`, against `npm run preview`
-(`http://localhost:4174/XPcomputer/` — port 4173 was already taken). Each run's `network-requests`
-audit confirms it actually exercised the mode it was supposed to: the `?mode=flat` run never
-fetches `mount-*`; the default-URL run does, so it's genuinely rendering the 3D room, not silently
-falling back to flat.
+--only-categories=performance,accessibility,best-practices`, against `npm run preview` (Vite falls
+back to the next free port when lower ones are taken — 4174 on the first pass, 4175 on the
+follow-up below). Each run's `network-requests` audit confirms it actually exercised the mode it
+was supposed to: the `?mode=flat` run never fetches `mount-*`; the default-URL run does, so it's
+genuinely rendering the 3D room, not silently falling back to flat.
+
+**Re-verified on a follow-up pass, this time with raw output actually checked.** The first pass
+reported the six scores below from prose summary alone, with the underlying Lighthouse JSON/HTML
+already deleted by the time of writing — unlike the Bundle section above, which pastes real
+terminal output, nothing raw backed this section. A reviewer correctly flagged that as an evidence
+gap. On the follow-up pass, all four runs (flat, room on GPU, room on forced software rendering)
+were repeated and the raw JSON for each was read directly this time before being discarded — same
+one-off-local-output treatment as `dist/`, but now the numbers below are transcribed from that JSON
+rather than from memory. All six headline scores reproduced exactly.
 
 | Mode | Performance | Accessibility | Best Practices | Target |
 |---|---|---|---|---|
@@ -194,29 +203,38 @@ Both modes clear the brief's targets. Two things worth being precise about:
 
 - **Accessibility did not flag contrast anywhere** — not the taskbar clock, not
   `.xp-sm-sublabel`. So the brief's conditional fix (darken `.xp-sm-sublabel` to `#4a5d7c`) doesn't
-  apply, and it was **not applied** — there was nothing for it to fix. Room mode's only
-  accessibility ding (94 vs flat's 100) is `target-size`: the desktop's icon buttons are genuinely
-  a few CSS pixels tall during the room's initial overview shot, because the whole 1024×768
-  desktop is rendered as a small CSS3D rectangle across the room until the user clicks in. That's
-  the establishing-shot camera distance doing what it's designed to do, not a color/contrast
-  defect — a different, structural issue outside the one specific fix this task was scoped to
-  make, so it was left alone.
+  apply, and it was **not applied** — there was nothing for it to fix, confirmed again on the
+  follow-up run. Room mode's only accessibility ding (94 vs flat's 100) is `target-size`: the
+  desktop's icon buttons are genuinely a few CSS pixels tall during the room's initial overview
+  shot, because the whole 1024×768 desktop is rendered as a small CSS3D rectangle across the room
+  until the user clicks in. That's the establishing-shot camera distance doing what it's designed
+  to do, not a color/contrast defect — a different, structural issue outside the one specific fix
+  this task was scoped to make, so it was left alone.
 - **Room mode's Performance score is real but GPU-dependent.** The 98 above is headless Chrome
-  using this machine's actual GPU for WebGL. The same run forced to pure software rendering
+  using this machine's actual GPU for WebGL. The same page forced to pure software rendering
   (`--disable-gpu --enable-unsafe-swiftshader`, no hardware acceleration at all) scored Performance
-  **60** instead (Total Blocking Time ballooned to ~38 s, Time to Interactive to ~44 s under a
-  software GL rasterizer) — accessibility and best-practices stayed at 94/96. Both numbers are
-  genuinely measured; which one a real visitor sees depends on whether their browser can
-  hardware-accelerate WebGL, which is exactly the situation the app's own "Low FX" toggle exists
-  for.
+  **59** on the follow-up run — accessibility and best-practices held at 94/96, unchanged. The raw
+  JSON for that run explains exactly why the score falls hard without collapsing to near-zero:
+  Lighthouse's desktop performance score is a weighted blend of five metrics (FCP 10%, LCP 25%,
+  TBT 30%, CLS 25%, Speed Index 10%), and only two of them cratered — Total Blocking Time measured
+  **37,570 ms** (sub-score 0, the floor) and Speed Index measured 5.7 s (sub-score 0.01) — while
+  First Contentful Paint (0.4 s), Largest Contentful Paint (0.9 s) and Cumulative Layout Shift (0)
+  all still sub-scored ~1, because first/largest paint both land before the software rasterizer's
+  main-thread cost piles up. Weighted out: `10·1 + 25·0.97 + 30·0 + 25·1 + 10·0.01 ≈ 59`, matching
+  the reported score. Time to Interactive was also measured, at **44,204 ms (~44.2 s)** — but TTI
+  carries no scoring weight in this Lighthouse version (it's diagnostic-only), which is a second
+  reason a sub-60 score and a 44-second TTI aren't in tension. Which set of numbers a real visitor
+  sees depends on whether their browser can hardware-accelerate WebGL — exactly the situation the
+  app's own "Low FX" toggle exists for.
 - Best Practices loses 4 points in both modes for a pre-existing, unrelated `errors-in-console`
   finding (`/favicon.ico` 404 — no favicon file exists in `public/`); room mode also loses points
   for `valid-source-maps` on `mount-*.js` (sourcemaps are deliberately off — see the comment in
-  `vite.config.js`). Neither is in this task's scope.
+  `vite.config.js`). Neither is in this task's scope. Both confirmed unchanged on the follow-up run.
 
-Full JSON/HTML reports were generated locally (`lighthouse-*.report.{json,html}`) while doing this
-and then discarded afterward — one-off measurement output, not project files, same treatment as
-`dist/`.
+Full JSON/HTML reports were generated locally (`lighthouse-*.report.{json,html}`) for all four
+runs. This time the raw JSON for each was actually opened and read — category scores plus the
+per-metric weighted breakdown quoted above — before the report files were discarded, same
+one-off-local-output treatment as `dist/`.
 
 ### Runtime (Performance API, in room mode)
 
