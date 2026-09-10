@@ -288,14 +288,17 @@ values), had inconsistent indentation at nearly every nesting level, repeated th
 hand-typed to resemble JSON rather than mechanically copied from the actual file. The *values* in
 it were separately re-verified as correct; only the artifact itself failed to prove that.
 
-A third fix pass (this one) changes the mechanism instead of pasting into markdown a third time: it
-re-ran all three configurations once more and saved the actual `--output=json` files Lighthouse
-wrote — complete, untouched, never opened in an editor or retyped — permanently in this task's SDD
-workspace directory:
+A third fix pass changed the mechanism instead of pasting into markdown a third time: it re-ran all
+three configurations once more and saved the actual `--output=json` files Lighthouse wrote —
+complete, untouched, never opened in an editor or retyped. Those files first landed in this task's
+SDD workspace directory (git-ignored scratch, not part of the repository); they were moved into
+`docs/lighthouse/` afterward specifically so they'd actually ship with the repo instead of vanishing
+the moment that workspace was cleaned up — the whole point of finally getting a real file was
+defeated if nobody but this session could ever open it:
 
-- `.superpowers/sdd/2026-09-07-phase6-polish/lighthouse-flat.report.json`
-- `.superpowers/sdd/2026-09-07-phase6-polish/lighthouse-room-gpu.report.json`
-- `.superpowers/sdd/2026-09-07-phase6-polish/lighthouse-room-software.report.json`
+- `docs/lighthouse/lighthouse-flat.report.json`
+- `docs/lighthouse/lighthouse-room-gpu.report.json`
+- `docs/lighthouse/lighthouse-room-software.report.json`
 
 Every number in this section was cross-checked against those three files with one-line `node -e`
 reads (`categories.<id>.score`, `audits[id].numericValue`/`displayValue`) — not by pasting any
@@ -341,7 +344,7 @@ Both modes clear the brief's targets. A few things worth being precise about:
   (`--disable-gpu --enable-unsafe-swiftshader`, no hardware acceleration at all) scored Performance
   **59** again on this latest run — accessibility and best-practices held at 94/96, unchanged. The
   real JSON for that run, saved at
-  `.superpowers/sdd/2026-09-07-phase6-polish/lighthouse-room-software.report.json`, explains exactly
+  `docs/lighthouse/lighthouse-room-software.report.json`, explains exactly
   why the score falls hard without collapsing to near-zero: Lighthouse's desktop performance score
   is a weighted blend of five metrics (FCP 10%, LCP 25%, TBT 30%, CLS 25%, Speed Index 10%), and
   only two of them cratered — Total Blocking Time measured **37,630 ms** (sub-score 0, the floor)
@@ -362,12 +365,13 @@ Both modes clear the brief's targets. A few things worth being precise about:
   so a fresh Lighthouse run should recover those 4 points in both modes — that re-run has not been
   done, so the 96/96 above is left as originally measured rather than guessed at.
 
-Full `--output=json` reports for all three runs from this latest pass are kept permanently —
-unlike every earlier pass, which read the numbers out of the JSON and then deleted it — at:
+Full `--output=json` reports for all three runs from this latest pass are kept permanently, in the
+repository itself — unlike every earlier pass, which read the numbers out of the JSON and then
+deleted it — at:
 
-- `.superpowers/sdd/2026-09-07-phase6-polish/lighthouse-flat.report.json`
-- `.superpowers/sdd/2026-09-07-phase6-polish/lighthouse-room-gpu.report.json`
-- `.superpowers/sdd/2026-09-07-phase6-polish/lighthouse-room-software.report.json`
+- `docs/lighthouse/lighthouse-flat.report.json`
+- `docs/lighthouse/lighthouse-room-gpu.report.json`
+- `docs/lighthouse/lighthouse-room-software.report.json`
 
 These are the exact, complete bytes Lighthouse wrote to disk for this pass. Open any of them
 directly to check any number in this section against the source — there is no transcription step
