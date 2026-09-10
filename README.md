@@ -3,12 +3,12 @@
 Stephen Tse's interactive resume: a cyberpunk bedroom (three.js) with an old PC
 running a fake Windows XP. Internet Explorer shows the resume, My Computer and
 My Documents are explorable, and the Start menu has Minesweeper, Solitaire and
-Pinball. Live at https://stephenyctsedev.github.io/XPcomputer/
+Pinball. Live at https://stephenyctsedev.github.io/Portfolio/
 
 ## Run locally
 
     npm install
-    npm run dev          # http://localhost:5173/XPcomputer/
+    npm run dev          # http://localhost:5173/Portfolio/
     npm run dev -- --open
 
 Add `?mode=flat` to skip the 3D room, `?mode=room` to force it.
