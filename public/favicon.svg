@@ -1,0 +1,10 @@
+<!-- Site favicon: a simplified take on this project's own four-colour flag motif
+     (see src/xp/icons/windowsFlag.js, used on the boot screen and Start button).
+     Flattened to four plain rounded squares so the shape reads at 16-32px; same
+     from-scratch palette, no Microsoft artwork or file involved. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect x="2" y="2" width="13" height="13" rx="2" fill="#f35325"/>
+  <rect x="17" y="2" width="13" height="13" rx="2" fill="#81bc06"/>
+  <rect x="2" y="17" width="13" height="13" rx="2" fill="#05a6f0"/>
+  <rect x="17" y="17" width="13" height="13" rx="2" fill="#ffba08"/>
+</svg>
