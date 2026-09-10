@@ -40,10 +40,12 @@ describe('Task Manager', () => {
     const tm = openTaskManager(ctx);
     tm.el.querySelectorAll('[role="tab"]')[1].click();
     const procRows = () => [...tm.el.querySelectorAll('.xp-tm-procs tbody tr')];
-    const notepadRow = procRows().find((r) => r.children[0].textContent === 'notepad.exe');
+    let notepadRow = procRows().find((r) => r.children[0].textContent === 'notepad.exe');
     notepadRow.click();
     expect(notepadRow.classList.contains('selected')).toBe(true);
     ctx.wm.open({ appId: 'iexplore', title: 'Homepage - Internet Explorer' });
+    // Re-query the fresh row from the rebuilt DOM after render()
+    notepadRow = procRows().find((r) => r.children[0].textContent === 'notepad.exe');
     expect(notepadRow.classList.contains('selected')).toBe(true);
   });
 });
