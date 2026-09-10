@@ -4,11 +4,22 @@ export function createMenus(screenEl, { sounds } = {}) {
   let currentOnClose = null;
 
   function onDocumentDown(e) { if (current && !current.contains(e.target)) close(); }
+  const focusables = () => (current ? [...current.querySelectorAll('.xp-menu-item:not(:disabled)')] : []);
+  function onKey(e) {
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    e.preventDefault();
+    const items = focusables();
+    const index = items.indexOf(document.activeElement);
+    const next = e.key === 'ArrowDown' ? (index + 1) % items.length : (index - 1 + items.length) % items.length;
+    items[next]?.focus({ preventScroll: true });
+  }
   function close() {
     if (!current) return;
     current.remove();
     current = null;
     document.removeEventListener('pointerdown', onDocumentDown, true);
+    document.removeEventListener('keydown', onKey);
     const onClose = currentOnClose;
     currentOnClose = null;
     onClose?.();
@@ -53,6 +64,8 @@ export function createMenus(screenEl, { sounds } = {}) {
     menu.style.left = `${Math.min(x, maxX)}px`;
     menu.style.top = `${Math.min(y, maxY)}px`;
     document.addEventListener('pointerdown', onDocumentDown, true);
+    document.addEventListener('keydown', onKey);
+    focusables()[0]?.focus({ preventScroll: true });
     sounds?.play('menu');
     return menu;
   }
