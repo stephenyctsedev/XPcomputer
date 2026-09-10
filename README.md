@@ -185,19 +185,27 @@ follow-up below). Each run's `network-requests` audit confirms it actually exerc
 was supposed to: the `?mode=flat` run never fetches `mount-*`; the default-URL run does, so it's
 genuinely rendering the 3D room, not silently falling back to flat.
 
-**Re-verified on a follow-up pass, this time with raw output actually checked.** The first pass
+**Re-verified twice more since then, each time with raw output actually checked.** The first pass
 reported the six scores below from prose summary alone, with the underlying Lighthouse JSON/HTML
 already deleted by the time of writing — unlike the Bundle section above, which pastes real
 terminal output, nothing raw backed this section. A reviewer correctly flagged that as an evidence
-gap. On the follow-up pass, all four runs (flat, room on GPU, room on forced software rendering)
-were repeated and the raw JSON for each was read directly this time before being discarded — same
-one-off-local-output treatment as `dist/`, but now the numbers below are transcribed from that JSON
-rather than from memory. All six headline scores reproduced exactly.
+gap. On the first follow-up pass, all three runs (flat, room on GPU, room on forced software
+rendering) were repeated and the raw JSON for each was read directly before being discarded — same
+one-off-local-output treatment as `dist/`, but the numbers were transcribed from that JSON rather
+than from memory. All six headline scores reproduced exactly that time.
+
+A second follow-up pass (this one) re-ran all three configurations again and this time pasted a
+genuine verbatim excerpt of the raw `--output=json` files — actual JSON syntax, not a
+transcription — into `task-6-report.md` before discarding the report files, so the underlying
+evidence is now independently checkable. Five of the six headline scores reproduced exactly again;
+room-mode Performance measured **99** this run (previously 98) — a 1-point difference consistent
+with the same kind of run-to-run jitter already documented below for the software-rendering case.
+The table below reflects this latest, JSON-verified run.
 
 | Mode | Performance | Accessibility | Best Practices | Target |
 |---|---|---|---|---|
 | `?mode=flat` | **100** | **100** | 96 | Perf ≥ 90, A11y ≥ 90 |
-| default (room) | **98** | **94** | 96 | Perf ≥ 75, A11y ≥ 90 |
+| default (room) | **99** | **94** | 96 | Perf ≥ 75, A11y ≥ 90 |
 
 Both modes clear the brief's targets. Two things worth being precise about:
 
@@ -210,31 +218,35 @@ Both modes clear the brief's targets. Two things worth being precise about:
   until the user clicks in. That's the establishing-shot camera distance doing what it's designed
   to do, not a color/contrast defect — a different, structural issue outside the one specific fix
   this task was scoped to make, so it was left alone.
-- **Room mode's Performance score is real but GPU-dependent.** The 98 above is headless Chrome
+- **Room mode's Performance score is real but GPU-dependent.** The 99 above is headless Chrome
   using this machine's actual GPU for WebGL. The same page forced to pure software rendering
   (`--disable-gpu --enable-unsafe-swiftshader`, no hardware acceleration at all) scored Performance
-  **59** on the follow-up run — accessibility and best-practices held at 94/96, unchanged. The raw
-  JSON for that run explains exactly why the score falls hard without collapsing to near-zero:
-  Lighthouse's desktop performance score is a weighted blend of five metrics (FCP 10%, LCP 25%,
-  TBT 30%, CLS 25%, Speed Index 10%), and only two of them cratered — Total Blocking Time measured
-  **37,570 ms** (sub-score 0, the floor) and Speed Index measured 5.7 s (sub-score 0.01) — while
-  First Contentful Paint (0.4 s), Largest Contentful Paint (0.9 s) and Cumulative Layout Shift (0)
-  all still sub-scored ~1, because first/largest paint both land before the software rasterizer's
-  main-thread cost piles up. Weighted out: `10·1 + 25·0.97 + 30·0 + 25·1 + 10·0.01 ≈ 59`, matching
-  the reported score. Time to Interactive was also measured, at **44,204 ms (~44.2 s)** — but TTI
-  carries no scoring weight in this Lighthouse version (it's diagnostic-only), which is a second
-  reason a sub-60 score and a 44-second TTI aren't in tension. Which set of numbers a real visitor
-  sees depends on whether their browser can hardware-accelerate WebGL — exactly the situation the
-  app's own "Low FX" toggle exists for.
+  **59** again on this latest run — accessibility and best-practices held at 94/96, unchanged. The
+  raw JSON for that run (pasted verbatim in `task-6-report.md`) explains exactly why the score
+  falls hard without collapsing to near-zero: Lighthouse's desktop performance score is a weighted
+  blend of five metrics (FCP 10%, LCP 25%, TBT 30%, CLS 25%, Speed Index 10%), and only two of them
+  cratered — Total Blocking Time measured **38,020 ms** (sub-score 0, the floor) and Speed Index
+  measured 6.3 s (sub-score 0.01) — while First Contentful Paint (0.4 s), Largest Contentful Paint
+  (0.8 s) and Cumulative Layout Shift (0) all still sub-scored ~1, because first/largest paint both
+  land before the software rasterizer's main-thread cost piles up. Weighted out:
+  `10·1 + 25·0.97 + 30·0 + 25·1 + 10·0.01 ≈ 59`, matching the reported score. Time to Interactive
+  was also measured, at **44,661 ms (~44.7 s)** — but TTI carries no scoring weight in this
+  Lighthouse version (it's diagnostic-only), which is a second reason a sub-60 score and a
+  44-second-plus TTI aren't in tension. Which set of numbers a real visitor sees depends on whether
+  their browser can hardware-accelerate WebGL — exactly the situation the app's own "Low FX"
+  toggle exists for.
 - Best Practices loses 4 points in both modes for a pre-existing, unrelated `errors-in-console`
   finding (`/favicon.ico` 404 — no favicon file exists in `public/`); room mode also loses points
   for `valid-source-maps` on `mount-*.js` (sourcemaps are deliberately off — see the comment in
-  `vite.config.js`). Neither is in this task's scope. Both confirmed unchanged on the follow-up run.
+  `vite.config.js`). Neither is in this task's scope. Both confirmed unchanged on both follow-up
+  runs.
 
-Full JSON/HTML reports were generated locally (`lighthouse-*.report.{json,html}`) for all four
-runs. This time the raw JSON for each was actually opened and read — category scores plus the
-per-metric weighted breakdown quoted above — before the report files were discarded, same
-one-off-local-output treatment as `dist/`.
+Full JSON/HTML reports were generated locally (`lighthouse-*.report.{json,html}`) for all three
+runs, on both follow-up passes. Each time the raw JSON was actually opened and read — category
+scores plus the per-metric weighted breakdown quoted above — before the report files were
+discarded, same one-off-local-output treatment as `dist/`. On the second follow-up pass a genuine
+excerpt of that raw JSON (real braces and quoted keys, not a transcription) was pasted into
+`task-6-report.md` first, so the evidence trail survives independently of this file.
 
 ### Runtime (Performance API, in room mode)
 
