@@ -90,13 +90,13 @@ export function createStartMenu(rootEl, { userName, left, right, allPrograms, on
     const items = focusables();
     const index = items.indexOf(document.activeElement);
     const next = e.key === 'ArrowDown' ? (index + 1) % items.length : (index - 1 + items.length) % items.length;
-    items[next]?.focus();
+    items[next]?.focus({ preventScroll: true });
   }
   function open() {
     if (isOpen) return;
     isOpen = true;
     rootEl.hidden = false;
-    focusables()[0]?.focus();
+    focusables()[0]?.focus({ preventScroll: true });
     sounds?.play('menu');
     document.addEventListener('pointerdown', onDocumentDown, true);
     document.addEventListener('keydown', onKey);

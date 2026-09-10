@@ -18,6 +18,8 @@ export function registerDisplayProperties(registry) {
 
 export function openDisplayProperties(ctx) {
   const { wm, storage, desktopEl, wallpaperUrl } = ctx;
+  const existing = wm.find('display')[0];
+  if (existing) { existing.focus(); return existing; }
   let choice = WALLPAPERS[storage.get(KEY)] ? storage.get(KEY) : 'hills';
   const content = document.createElement('div');
   content.className = 'xp-display';

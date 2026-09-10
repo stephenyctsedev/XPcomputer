@@ -37,4 +37,10 @@ describe('Display Properties', () => {
     tabAnchor.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(true);
   });
+  it('focuses the existing dialog instead of opening a second one', () => {
+    const first = openDisplayProperties(ctx);
+    const second = openDisplayProperties(ctx);
+    expect(second).toBe(first);
+    expect(ctx.wm.windows).toHaveLength(1);
+  });
 });

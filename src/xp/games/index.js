@@ -15,6 +15,7 @@ export function registerGames(registry, loaders = GAME_LOADERS) {
           const mod = await def.load();
           return def.options ? mod[def.open](ctx, def.options(ctx)) : mod[def.open](ctx);
         } catch (err) {
+          console.error('[XPcomputer] game chunk failed to load', err);
           return ctx.dialogs.message({
             title: 'Windows', kind: 'error',
             text: `Cannot start ${def.name}. This program cannot be started.`,

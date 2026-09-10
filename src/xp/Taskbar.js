@@ -10,7 +10,7 @@ export function formatClock(date) {
 export function createTaskbar(rootEl, { wm, sounds, onStart, now = () => new Date() }) {
   rootEl.classList.add('xp-taskbar');
   rootEl.innerHTML = `
-    <button class="xp-start" type="button" aria-haspopup="menu"><span class="xp-start-flag"></span>start</button>
+    <button class="xp-start" type="button" aria-haspopup="menu" aria-expanded="false"><span class="xp-start-flag"></span>start</button>
     <div class="xp-tasks"></div>
     <div class="xp-tray"><button class="xp-tray-mute" type="button" title="Volume" aria-label="Toggle sound"></button><span class="xp-clock"></span></div>
     <div class="xp-balloon" hidden><button class="xp-balloon-close" type="button" aria-label="Close">×</button><div class="xp-balloon-title"></div><div class="xp-balloon-text"></div></div>`;
