@@ -19,7 +19,7 @@ export function renderHomepage(resume, { pdfHref, repoUrl, visitors = 1337 } = {
 <body>
 <table class="page" width="760" cellpadding="0" cellspacing="0">
 <tr><td class="banner">
-  <div class="marquee"><span>*** Welcome to my homepage! *** You are visitor number ${counter} *** Thanks for stopping by! ***</span></div>
+  <div class="marquee"><span class="marquee-text">*** Welcome to my homepage! *** You are visitor number ${counter} *** Thanks for stopping by! ***</span></div>
   <h1>${esc(displayName)}</h1>
   <h2>${esc(title)} &middot; ${esc(contact.location)}</h2>
 </td></tr>

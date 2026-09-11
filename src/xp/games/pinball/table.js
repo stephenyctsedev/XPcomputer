@@ -4,8 +4,9 @@ import { closestPointOnSegment, collideCircleSegment, collideCircleCircle, flipp
 export const TABLE = { width: 400, height: 700, ballRadius: 8 };
 export const LETTERS = ['S', 'T', 'E', 'P', 'H', 'E', 'N'];
 export const SCORES = { bumper: 100, slingshot: 50, target: 500, bank: 5000, letter: 250, word: 10000 };
-export const FLIPPER = { length: 68, r: 6, rest: 0.45, raised: -0.5, speed: 24 };
+export const FLIPPER = { length: 64, r: 6, rest: 0.5, raised: -0.5, speed: 24 };
 export const NO_INPUT = Object.freeze({ left: false, right: false, plunger: false, nudgeLeft: false, nudgeRight: false });
+export const STEP = 1 / 240;
 
 const GRAVITY = 900;
 const LANE_X = 366;
@@ -14,12 +15,12 @@ const seg = (ax, ay, bx, by, r = 0) => ({ ax, ay, bx, by, r });
 
 function buildWalls() {
   const walls = [
-    seg(20, 180, 20, 540), seg(20, 540, 124, 636),             // left wall + inlane guide
-    seg(352, 180, 352, 540), seg(352, 540, 276, 636),          // right playfield wall + guide
+    seg(20, 180, 20, 540), seg(20, 540, 126, 640),             // left wall + inlane guide
+    seg(352, 180, 352, 540), seg(352, 540, 274, 640),          // right playfield wall + guide
     seg(380, 180, 380, LANE_FLOOR), seg(352, LANE_FLOOR, 380, LANE_FLOOR), // plunger lane
-    seg(20, 275, 60, 275), seg(60, 275, 60, 365), seg(60, 365, 20, 365),   // drop-target bank block
-    seg(60, 500, 60, 560), seg(60, 560, 105, 560),             // left slingshot body
-    seg(340, 500, 340, 560), seg(340, 560, 295, 560),          // right slingshot body
+    seg(20, 268, 60, 280), seg(60, 280, 60, 365), seg(60, 365, 20, 365),   // drop-target bank block
+    seg(60, 470, 60, 530), seg(60, 530, 105, 530),             // left slingshot body
+    seg(312, 470, 312, 530), seg(312, 530, 267, 530),          // right slingshot body
   ];
   for (const x of [104, 142, 181, 219, 258, 296]) walls.push(seg(x, 195, x, 235, 2));   // lane dividers
   const n = 24;
@@ -36,15 +37,16 @@ const spawnBall = () => ({ x: LANE_X, y: LANE_FLOOR - TABLE.ballRadius, vx: 0, v
 export function createTable() {
   return {
     state: 'playing', time: 0, score: 0, ballNumber: 1, ballsTotal: 3, extraBallAwarded: false, tilt: false, nudges: [],
+    stillFor: 0, searches: 0,
     letters: LETTERS.map(() => false),
     ball: spawnBall(),
     plunger: { charge: 0, held: false },
-    left: { px: 128, py: 640, length: FLIPPER.length, r: FLIPPER.r, angle: FLIPPER.rest, omega: 0 },
-    right: { px: 272, py: 640, length: FLIPPER.length, r: FLIPPER.r, angle: Math.PI - FLIPPER.rest, omega: 0 },
+    left: { px: 122, py: 640, length: FLIPPER.length, r: FLIPPER.r, angle: FLIPPER.rest, omega: 0 },
+    right: { px: 278, py: 640, length: FLIPPER.length, r: FLIPPER.r, angle: Math.PI - FLIPPER.rest, omega: 0 },
     walls: buildWalls(),
     gate: seg(352, 178, 380, 178, 2),
-    bank: { x: 20, y: 275, w: 40, h: 90 },
-    slingshots: [{ seg: seg(60, 500, 105, 560, 3), flash: 0 }, { seg: seg(340, 500, 295, 560, 3), flash: 0 }],
+    bank: { x: 20, y: 268, w: 40, h: 97 },
+    slingshots: [{ seg: seg(60, 470, 105, 530, 3), flash: 0 }, { seg: seg(312, 470, 267, 530, 3), flash: 0 }],
     bumpers: [{ x: 150, y: 270, r: 20, flash: 0 }, { x: 250, y: 270, r: 20, flash: 0 }, { x: 200, y: 345, r: 20, flash: 0 }],
     targets: [290, 320, 350].map((y) => ({ seg: seg(63, y - 11, 63, y + 11, 2), dropped: false })),
     lanes: [85, 123, 162, 200, 238, 277, 315].map((x) => ({ x, y: 215, r: 10, inside: false })),
@@ -64,6 +66,8 @@ function drain(t, events) {
   events.push({ type: 'drain' });
   t.tilt = false;
   t.nudges = [];
+  t.stillFor = 0;
+  t.searches = 0;
   if (t.ballNumber >= t.ballsTotal) {
     t.state = 'over';
     events.push({ type: 'gameOver' });
@@ -148,6 +152,16 @@ export function stepTable(t, dt, input = NO_INPUT) {
 
   if (ball.inLane && ball.y < 180) ball.inLane = false;
   if (ball.inLane && !ball.atRest && ball.y > LANE_FLOOR - 30 && Math.abs(ball.vy) < 20) { ball.atRest = true; ball.vx = 0; ball.vy = 0; ball.x = LANE_X; ball.y = LANE_FLOOR - ball.r; }
+  const speed = Math.hypot(ball.vx, ball.vy);
+  if (!ball.atRest && speed < 30) t.stillFor += dt; else t.stillFor = 0;
+  if (t.stillFor > 2.5) {
+    t.stillFor = 0;
+    t.searches++;
+    if (t.searches > 3) { events.push({ type: 'ballLost' }); drain(t, events); return events; }
+    ball.vx = ball.x < TABLE.width / 2 ? 140 : -140;   // shove toward the middle of the table
+    ball.vy = -260;
+    events.push({ type: 'ballSearch' });
+  }
   if (ball.y - ball.r > TABLE.height + 30) drain(t, events);
   return events;
 }

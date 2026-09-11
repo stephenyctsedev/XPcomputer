@@ -1,11 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { createTable, stepTable, NO_INPUT, FLIPPER, SCORES } from './table.js';
+import { createTable, stepTable, NO_INPUT, FLIPPER, SCORES, STEP } from './table.js';
 
 const DT = 1 / 240;
 const inPlay = (t, ball) => Object.assign(t.ball, { inLane: false, atRest: false, vx: 0, vy: 0, ...ball });
 const types = (events) => events.map((e) => e.type);
 
 describe('table', () => {
+  it('publishes the fixed physics step', () => {
+    expect(STEP).toBeCloseTo(1 / 240, 10);
+  });
+
   it('starts with the ball resting in the plunger lane and three balls', () => {
     const t = createTable();
     expect(t.state).toBe('playing');
@@ -57,7 +61,7 @@ describe('table', () => {
     expect(t.score).toBe(SCORES.bumper);
     expect(t.ball.vy).toBeLessThan(0);
     expect(t.bumpers[0].flash).toBeGreaterThan(0);
-    inPlay(t, { x: 90, y: 524, vx: -100 });          // 10 units off the diagonal (60,500)→(105,560), moving into it
+    inPlay(t, { x: 90, y: 494, vx: -100 });          // 9.6 units off the diagonal (60,470)->(105,530), moving into it
     expect(types(stepTable(t, DT, NO_INPUT))).toContain('slingshot');
     expect(t.score).toBe(SCORES.bumper + SCORES.slingshot);
   });
@@ -120,7 +124,7 @@ describe('table', () => {
 
   it('swings the flippers while held and sends the ball up on contact', () => {
     const t = createTable();
-    inPlay(t, { x: 160, y: 641 });
+    inPlay(t, { x: 150, y: 641 });
     const rest = t.left.angle;
     let events = [];
     for (let i = 0; i < 12; i++) events = events.concat(stepTable(t, DT, { ...NO_INPUT, left: true }));
@@ -130,5 +134,38 @@ describe('table', () => {
     expect(t.ball.vy).toBeLessThan(-100);
     for (let i = 0; i < 240; i++) stepTable(t, DT, NO_INPUT);
     expect(t.left.angle).toBeCloseTo(rest, 5);
+  });
+
+  it('shakes a motionless ball loose after a few seconds', () => {
+    const t = createTable();
+    inPlay(t, { x: 200, y: 400 });
+    let events = [];
+    for (let i = 0; i < 240 * 3; i++) {
+      Object.assign(t.ball, { x: 200, y: 400, vx: 0, vy: 0 });   // pin it: stands in for a perfect wedge
+      events = events.concat(stepTable(t, DT, NO_INPUT));
+    }
+    expect(types(events)).toContain('ballSearch');
+  });
+
+  it('gives up on a ball that cannot be shaken loose and counts it as drained', () => {
+    const t = createTable();
+    inPlay(t, { x: 200, y: 400 });
+    let events = [];
+    for (let i = 0; i < 240 * 15; i++) {
+      Object.assign(t.ball, { x: 200, y: 400, vx: 0, vy: 0 });
+      events = events.concat(stepTable(t, DT, NO_INPUT));
+      if (types(events).includes('ballLost')) break;
+    }
+    expect(types(events)).toContain('ballLost');
+    expect(types(events)).toContain('drain');
+    expect(t.ballNumber).toBe(2);
+  });
+
+  it('does not shake a ball that is simply moving slowly', () => {
+    const t = createTable();
+    inPlay(t, { x: 200, y: 300, vx: 60 });
+    let events = [];
+    for (let i = 0; i < 240 * 3; i++) events = events.concat(stepTable(t, DT, NO_INPUT));
+    expect(types(events)).not.toContain('ballSearch');
   });
 });
