@@ -1,12 +1,11 @@
 import './pinball.css';
-import { createTable, stepTable, LETTERS } from './table.js';
+import { createTable, stepTable, LETTERS, STEP } from './table.js';
 import { createRenderer } from './render.js';
 import { createInput } from './input.js';
 import { attachMenubar } from '../../Menu.js';
 
 const HIGH_KEY = 'xpcomputer.pinball.high';
-const STEP = 1 / 240;
-const SOUND_FOR = { flipper: 'flipper', bumper: 'bumper', slingshot: 'bumper', target: 'target', letter: 'target', bank: 'win', word: 'win', extraBall: 'win', drain: 'drain', launch: 'click', tilt: 'error', nudge: 'menu' };
+const SOUND_FOR = { flipper: 'flipper', bumper: 'bumper', slingshot: 'bumper', target: 'target', letter: 'target', bank: 'win', word: 'win', extraBall: 'win', drain: 'drain', launch: 'click', tilt: 'error', nudge: 'menu', ballSearch: 'menu', ballLost: 'error' };
 
 export function registerPinball(registry) {
   registry.register('pinball', { name: 'Pinball', icon: 'pinball', launch: (ctx) => openPinball(ctx) });

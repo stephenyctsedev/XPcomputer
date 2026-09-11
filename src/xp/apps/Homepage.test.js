@@ -41,4 +41,31 @@ describe('renderHomepage', () => {
     expect(html).toContain('>Projects<');
     expect(html).not.toContain(resume.contact.portfolio);
   });
+  it('gives the scroller its own class so the counter digits are not swept up by it', () => {
+    expect(html).toMatch(/<div class="marquee"><span class="marquee-text">/);
+  });
+
+  it('the marquee animation rule cannot match a visitor-counter digit', async () => {
+    const { readFileSync } = await import('node:fs');
+    const css = readFileSync('src/xp/apps/homepage.css', 'utf8');
+    const animated = [...css.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+      .filter(([, , body]) => /animation\s*:\s*marquee/.test(body))
+      .map(([, selector]) => selector.trim());
+    expect(animated.length).toBeGreaterThan(0);
+
+    const host = document.createElement('div');
+    host.innerHTML = '<div class="marquee"><span class="marquee-text">hi <span class="digit">7</span></span></div>';
+    const digit = host.querySelector('.digit');
+    const scroller = host.querySelector('.marquee-text');
+    for (const selector of animated) {
+      expect(digit.matches(selector)).toBe(false);
+      expect(scroller.matches(selector)).toBe(true);
+    }
+  });
+
+  it('stops the marquee scrolling when the visitor prefers reduced motion', async () => {
+    const { readFileSync } = await import('node:fs');
+    const css = readFileSync('src/xp/apps/homepage.css', 'utf8');
+    expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)[^}]*\.marquee-text[^}]*animation: none/s);
+  });
 });

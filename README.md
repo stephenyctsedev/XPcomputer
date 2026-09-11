@@ -101,6 +101,11 @@ Run before every release, in Chrome and Firefox at minimum (Edge and Safari when
 - [ ] The MEGABOX video plays in the viewer and starts muted when the tray speaker is muted
 - [ ] The desktop My Pictures icon, the Start menu entry and the homepage Projects link all reach the folder
 - [ ] Pinball: launch, flippers, bumpers, targets/bank, letters/extra ball, tilt, three-ball game over with high score, pause on minimize
+- [ ] A ball released anywhere on the playfield drains within 12 s (`table.trap.test.js`).
+- [ ] The clear gap between the flipper tips at rest is 1.5 to 2.5 ball diameters.
+- [ ] Both outlanes are at least 4 ball radii wide between the wall and the slingshot body.
+- [ ] A wedged ball is shaken loose within 2.5 s and given up after three attempts.
+- [ ] The homepage banner shows no grey blocks: the visitor counter digits are character-sized.
 
 ## Browser notes
 
