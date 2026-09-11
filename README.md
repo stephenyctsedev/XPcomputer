@@ -1,4 +1,4 @@
-# XPcomputer
+# Stephen Tse's Portfolio
 
 Stephen Tse's interactive resume: a cyberpunk bedroom (three.js) with an old PC
 running a fake Windows XP. Internet Explorer shows the resume, My Computer and
@@ -414,14 +414,16 @@ call counter.
 
 ## Screenshots
 
-Still needed from Stephen — three screenshots, captured from his own machine (not generated),
-saved under `docs/screenshots/` using the filenames below. Once they exist, add the corresponding
-`![...](docs/screenshots/...)` line for each; nothing is linked yet so there's nothing broken in
-the meantime.
+Captured from Stephen's own machine.
 
-- `docs/screenshots/room-overview.png` — the 3D bedroom, camera pulled back before clicking the PC
-- `docs/screenshots/desktop-ie.png` — focused on the CRT, Internet Explorer open showing the resume homepage
-- `docs/screenshots/game.png` — one game in play (Minesweeper, Solitaire or Pinball — whichever looks best)
+![The 3D bedroom, camera pulled back before clicking the PC](docs/screenshots/room-overview.png)
+*The 3D bedroom, camera pulled back before clicking the PC*
+
+![Focused on the CRT, Internet Explorer open showing the resume homepage](docs/screenshots/desktop-ie.png)
+*Focused on the CRT, Internet Explorer open showing the resume homepage*
+
+![Solitaire in play](docs/screenshots/game.png)
+*Solitaire in play*
 
 ## How it was built
 
